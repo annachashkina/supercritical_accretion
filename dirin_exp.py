@@ -1385,11 +1385,9 @@ def newname(fname):
     fig.set_size_inches(6, 5)
     savefig(fname+'_qeq.eps')
 
-
-
     close()
 
-
+# difference in xi for different eta values
 def difeta():
 
     fname='rmm_exp'
@@ -1402,7 +1400,6 @@ def difeta():
     nuu=size(wuu)
     ndd=size(wdd)
     
-
     print nuu
     print ndd
 
@@ -1411,7 +1408,6 @@ def difeta():
     xiar=reshape(asarray(xi,dtype=double),[nuu,ndd])
     qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
  
-
     mu21,md21,xi1,qeq1=rk.rmmread(fname1)
 
     wuu1=unique(mu21)
@@ -1419,7 +1415,6 @@ def difeta():
     nuu1=size(wuu1)
     ndd1=size(wdd1)
     
-
     print nuu1
     print ndd1
 
@@ -1428,10 +1423,6 @@ def difeta():
     xiar1=reshape(asarray(xi1,dtype=double),[nuu1,ndd1])
     qeqar1=reshape(asarray(qeq1,dtype=double),[nuu1,ndd1])
  
-
-
-
-
     plt.clf()
     fig=figure()
     contourf(muar, mdar, xiar1-xiar) #,levels=rlev)
@@ -1465,15 +1456,38 @@ def difeta():
     fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
     fig.set_size_inches(6, 5)
     savefig(fname+'_qeq_dif.eps')
-
-
-
     close()
 
+def scurve(rmmfile, themu):
 
+    mu2,md2,xi,qeq=rk.rmmread(rmmfile)
 
+    wm=((mu2-themu)**2).argmin()
+    wmu=where(mu2 == mu2[wm])
+    
+    nmu=size(wmu)
+    mdar=asarray(md2[wmu]) ;   xiar=asarray(xi[wmu]) ;   qeqar=asarray(qeq[wmu])
+    
+    
+    tinar=np.zeros(nmu, dtype=double)
+    mdinar=np.zeros(nmu, dtype=double)
+    mdoutar=mdar
+    
+    for k in arange(nmu):
+        b.parset(newmu=mu2[wm], newmdot=mdar[k],newps=-10.,neweta=0.,newalpha=0.1)
+        parset(newmu=mu2[wm], newmdot=mdar[k],newps=-10.,neweta=0.,newalpha=0.1)
+        oint, hint, tint, htormax, mdotin, wint = rastr(xiar[k], qeqar[k])
+        tinar[k]=tint
+        mdinar[k]=mdotin
 
-
-
-
+    clf()
+    plot(tinar, mdoutar, color='r', label=r'$\dot{m}_{\rm out}$')
+    plot(tinar, mdinar, color='k', label=r'$\dot{m}_{\rm in}$')
+    xlabel(r'$\varkappa \Sigma$')
+    ylabel(r'$\dot{m}$')
+    legend()
+    xscale('log')
+    yscale('log')
+    savefig('scurvein.eps')
+    
 
