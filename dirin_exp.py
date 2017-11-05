@@ -956,8 +956,6 @@ def experimental(newmu,newps):
     mumax=100.
     nmu=15
     muar=(mumax/mumin)**(arange(nmu)/double(nmu-1))*mumin
-
-
     
     xx=xiest
     qq=qeqest
@@ -1252,11 +1250,11 @@ def rmm(newps, neweta):
 
     tstart=time.time()
 
-    mumin=1. 
+    mumin=20. 
     mumax=100.
-    mdmin=0.1
-    mdmax=1000.
-    nmu=15
+    mdmin=500.
+    mdmax=5000.
+    nmu=10
     nd=16
 
     muar=(mumax/mumin)**(arange(nmu)/double(nmu-1))*mumin
