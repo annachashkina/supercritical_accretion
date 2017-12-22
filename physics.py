@@ -6,33 +6,7 @@ import os
 import scipy.optimize
 import scipy.special
 
-#physical parameters
-mu=1.
-ps=10.
-mdotglobal=100.
-#coefficients
-alpha=0.1
-eta=0.0
-kt=0.5
-epsilon=0.5
-psi=1.
-n=1.
-mmean=0.5
-#dimensionless coefficients
-lam=3.9848e10
-chi=8.8e-6/mmean
-pstar=4.33e-5
-#vertical structure
-tvert=219./1024.
-hvert=sqrt(5.)
-#program coefficients
-tol=1e-7
-toff=1e-12
-varold=0. #old temperature profile
-varnew=1. #new temperature profile
-qeqest=0.905
-xiest=0.63
-defac=0.99
+from parameters import *
 
 # vertical integration factor, int(1-x^2)^n dx
 def G(n):
@@ -46,8 +20,6 @@ def par0(xs, ys):
 
 # gas to total pressure
 def beta(tau,tc,wrf):
- #   print "beta= "+str(8.*chi/5.*alpha*tau*tc/wrf)
-#    jjii=raw_input()
     return chi*alpha*tau*tc/wrf*2.*(n+1.)/(2.*n+3.)
 
 def comegaga(tc,tau,r,wrf):
@@ -87,7 +59,7 @@ def Qcal(beta):
 
     return part1+part2
 
-# previous version of SPQR coefficients:
+# previous version of SPQR coefficients, n=1:
 def Scal_pr(beta):
     return 104./15.*beta-17.*pi/32.*beta-104./15.
 
@@ -97,22 +69,15 @@ def Pcal_pr(beta):
 def Qcal_pr(beta):
     return 9.*pi/16.*beta+64./5.-64.*beta/5.
 
-# some unused vertical structure function:
-def ex(wrf,r,tc,h):
-    a=256.*pi*alpha*tc**4.
- #   print "a= "+str(a)+'\n'
-    b=-45.*wrf
-#    print "b= "+str(b)+'\n'
-    d=360.*chi*tc*wrf*r**3.
-#    print "d= "+str(d)+'\n'
-    return a*h**3.+b*h**2.+d
+#what is it?
 
-def fh1(wrf,r,tc):
-    h=scipy.optimize.fsolve(ex, 0.1, args=(wrf,r,tc))
-    print h
+#def fh1(wrf,r,tc):
+#    h=scipy.optimize.fsolve(ex, 0.1, args=(wrf,r,tc))
+#    print h
 #
 
 # disc thickness
+
 def fh(wrf,r,tc):
     h=np.zeros(3, dtype=double)
     a=256.*pi*alpha*tc**4.
@@ -145,7 +110,7 @@ def fh(wrf,r,tc):
         k=-2.*sqrt(p/3.)*sinh(1./3.*arcsinh(3.*q/(2.*p)*sqrt(3./p)))-b/(3.*a)
     return k
 
-# surface density
+# surface density, it uses the old thickness
 def ftau(wrf,r,tc):
     h=fh(wrf,r,tc)
     return wrf*r**3.*hvert**2./(alpha*h**2.)

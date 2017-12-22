@@ -1,9 +1,11 @@
-import numpy as np
+from numpy import *
 import matplotlib.pyplot as plt
 import numpy.random
 import time
 import os
 import bocon as b
+
+from parameters import all
 
 # functions:
 from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau

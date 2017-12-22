@@ -8,6 +8,8 @@ from scipy.integrate import *
 from scipy.interpolate import *
 from scipy.optimize import curve_fit
 
+from parameters import all
+
 #Uncomment the following if you want to use LaTeX in figures 
 rc('font',**{'family':'serif','serif':['Times']})
 rc('mathtext',fontset='cm')

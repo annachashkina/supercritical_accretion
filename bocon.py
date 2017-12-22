@@ -16,31 +16,15 @@ rc('text', usetex=True)
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amssymb,amsmath}"]
 
 import numpy as np
+from numpy import *
 import matplotlib.pyplot as plt
 import numpy.random
 import time
 import os
+from physics import G
+from parameters import *
 
-#physical parameters
-mu=1.
-ps=10.
-mdotglobal=100.
-#coefficients
-alpha=0.1
-eta=0.1
-kt=0.5
-epsilon=0.5
-psi=1.
-#dimensionless coefficients
-lam=3.9848e10
-chi=8.8e-6
-pstar=4.33e-5
-#vertical structure
-tvert=219./1024.
-hvert=sqrt(5.)
-#program coefficients
-tol=1e-7
-toff=1e-12
+bound=0 #1 - local pressure balance, 0 - equatorial pressure balance
    
 def parset(**kwargs):
    #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
@@ -81,8 +65,11 @@ def fhin(rin, tau,mdotin):
     return 2.*hvert**2.*rin*(eta*mdotin+lam*mu**2./rin**4.)/tau
 
 def fwrfin(rin, hin,mdotin):
-#    print "wrfin= "+str(2.*alpha*(eta*mdotin+lam*mu**2./rin**4.)/rin**2.*hin)
-    return 2.*alpha*(eta*mdotin+lam*mu**2./rin**4.)/rin**2.*hin
+   coef=G(n+1)
+   if(bound==1):
+      return 2.*G(n+1)*alpha*(eta*mdotin+lam*mu**2./rin**4.)/rin**2.*hin
+   else:
+      return 2.*alpha*(eta*mdotin+lam*mu**2./rin**4.)/rin**2.*hin
 
 def quartic(c1,c2):
     # solves x^4+c2x+c1=0 for c1<0, c2>0, when there is !1 solution

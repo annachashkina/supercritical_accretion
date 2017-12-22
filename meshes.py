@@ -4,6 +4,8 @@ from matplotlib import axes
 from numpy import *
 import time
 
+from parameters import all
+
 import bocon as b
 import dirin as d
 

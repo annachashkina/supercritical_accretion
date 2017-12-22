@@ -1,0 +1,39 @@
+import matplotlib
+from matplotlib import rc
+from matplotlib import axes
+from numpy import *
+from pylab import *
+from scipy.integrate import *
+from scipy.interpolate import *
+from scipy.optimize import curve_fit
+from scipy.optimize import *
+import scipy.optimize
+import scipy.special
+
+#physical parameters
+mu=10. #magnetic moment in units 10^30 G cm^3
+ps=10. # spin period in seconds
+mdotglobal=1000. #accretion rate in units 4 pi G M/ (c\kappa)
+#coefficients
+alpha=0.1 #viscosity
+eta=0.0 #accretion efficiency 
+kt=0.5  # Btor/Bpol
+epsilon=0.5 #some fraction of the radiation that goes to accelerate the outflows
+psi=1. #accounts for the net angular momentum lost in the wind
+n=1. #vertical structure
+mmean=0.5 #mmean=m_particle/m_proton
+#dimensionless coefficients
+lam=3.9848e10
+chi=8.8e-6/mmean
+pstar=4.33e-5
+#vertical structure
+tvert=219./1024. #vertical structure n=1
+hvert=sqrt(5.)  #vertical structure n=1
+#program coefficients
+tol=1e-7 
+toff=1e-12
+varold=0. #old temperature profile, n=1
+varnew=1. #new temperature profile with any n
+qeqest=0.905 #
+xiest=0.63 #
+defac=0.99

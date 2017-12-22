@@ -6,3 +6,5 @@ Most of the physics is given in {\tt physics.py} and {\tt dirin.py}, in the latt
 {\tt plots.py } performs reprocessing and visualization.
 {\tt readkit.py } reads the data written in datafiles.
 {\tt ssdisk.py } contains Shakura-Sunyaev's approximate analytic solutions.
+
+
