@@ -24,27 +24,20 @@ import numpy.random
 import time
 import os
 import bocon as b
-import physics as f
 # import ssdisk as ss
 # import readkit as rk
 # import readkit as rk
 
-from parameters import *
 # functions:
 from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau
 from physics import Scal, Pcal, Qcal # SPQR
 from physics import xiinf, raffugen, peqgen
 # constants
-#from physics import mu, ps, mdotglobal, alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert
+from physics import mu, ps, mdotglobal, alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert
 # more constants:
-#from physics import tol, toff, varold, varnew, qeqest, xiest, defac
+from physics import tol, toff, varold, varnew, qeqest, xiest, defac
 # visualization functions:
-# from plots import
-
-def XQset(newxi, newqeq):
-    global xiest, qeqest
-    xiest=newxi
-    qeqest=newqeq
+# from plots import 
 
 # setting the values of the global parameters:
 def parset(**kwargs):
@@ -204,7 +197,6 @@ def rastr(rrin, qeq):
 
     return oint, hint, tint, htormax, mdotin, wint
 # criterion for the boundary conditions -- do we fit them?
-
 def doffwrfin(xi,qeq):
     ra=b.rafun()
     rin=ra*xi
@@ -226,10 +218,9 @@ def vrapper(arg):
 
     return (a,b)
 # main procedure searching the root
-
 def ordiv_smart(newmu, newmdot, newps):
-    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
-    parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+    parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
 #    print 'here'
     print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)
     tstart=time.time()
@@ -238,17 +229,7 @@ def ordiv_smart(newmu, newmdot, newps):
     print "co.x[0]= "+str(co.x[0])+' \n'
     print "co.x[1]= "+str(co.x[1])+' \n'
     print "calculation took "+str(tend-tstart)+"s = "+str((tend-tstart)/60.)+"min"
+
     return co.x
-
-def corot(newmu, newmdot, newps,rrin,qeq):
-    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-    parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-    pstar=4.33e-5
-
-    oint, hint, tint, htormax, mdotin, wint=rastr(rrin, qeq)
-    ral=rrin*(lam*mu**2/mdotin)**(2./7.)*2.**(-1./7.)
-    rco=(newps/pstar)**(2./3.)
-
-    print ral/rco
 
 ###############################

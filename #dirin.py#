@@ -228,6 +228,7 @@ def vrapper(arg):
 # main procedure searching the root
 
 def ordiv_smart(newmu, newmdot, newps):
+    global converged
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
 #    print 'here'
@@ -238,6 +239,8 @@ def ordiv_smart(newmu, newmdot, newps):
     print "co.x[0]= "+str(co.x[0])+' \n'
     print "co.x[1]= "+str(co.x[1])+' \n'
     print "calculation took "+str(tend-tstart)+"s = "+str((tend-tstart)/60.)+"min"
+    if(!x.success):
+        converged=False
     return co.x
 
 def corot(newmu, newmdot, newps,rrin,qeq):
