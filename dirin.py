@@ -231,18 +231,21 @@ def vrapper(arg):
 #    b=doffo(xi,qeq,tc)
     print "vrap a= "+str(a)+" vrap b= "+str(b)+'\n'
     print "xi= "+str(xi)+" qeq= "+str(qeq)+'\n'
-
+    fout=open("ordivtrack.txt", "w+")
+    fout.write(str(xi)+" "+str(qeq)+"\n")
+    fout.close()
     return (a,b)
 # main procedure searching the root
 
 def ordiv_smart(newmu, newmdot, newps):
+    os.system('rm ordivtrack.txt')
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     #    print 'here'
     print "ordiv_smart mu = "+str(mu)
     print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)
     tstart=time.time()
-    co=scipy.optimize.root(vrapper,(xiest,qeqest),method='hybr',jac=None,tol=1e-4,callback=None,options=None)
+    co=scipy.optimize.root(vrapper,(xiest,qeqest),method='df-sane',jac=None,tol=1e-4,callback=None,options=None)
     tend=time.time()
     print "co.x[0]= "+str(co.x[0])+' \n'
     print "co.x[1]= "+str(co.x[1])+' \n'
