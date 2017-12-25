@@ -114,6 +114,7 @@ def musearch(newmdot, newps):
     xlabel(r'$\mu$, $10^{30}$G')
     ylabel(r'$\xi$')
     savefig('musearch.eps')
+    print "musearch took "+str(tend-tstart)
     return muu[-1]
     
 def rmm(newps, neweta):
