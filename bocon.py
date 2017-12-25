@@ -25,26 +25,26 @@ from physics import G
 from parameters import *
 
 bound=0 #1 - local pressure balance, 0 - equatorial pressure balance
-   
+
 def parset(**kwargs):
-   #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
-   global mu, eta, ps, mdotglobal, alpha
-   
-   mu=kwargs['newmu']
-   eta=kwargs['neweta']
-   ps=kwargs['newps']
-   mdotglobal=kwargs['newmdot']
-   alpha=kwargs['newalpha']
-   
-   if(ps<0.):
-      ps=-ps*peq()
-   
-   print "BC parset:"
-   print "  now mu = "+str(mu)
-   print "  now mdot = "+str(mdotglobal)
-   print "  now eta = "+str(eta)
-   print "  now P = "+str(ps)+"s"
-   print "  now alpha = "+str(alpha)
+#(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
+    global mu, eta, ps, mdotglobal, alpha
+
+    mu=kwargs['newmu']
+    eta=kwargs['neweta']
+    ps=kwargs['newps']
+    mdotglobal=kwargs['newmdot']
+    alpha=kwargs['newalpha']
+
+    if(ps<0.):
+        ps=-ps*b.peq()
+
+    print "bocon parset:"
+    print "  now mu = "+str(mu)
+    print "  now mdot = "+str(mdotglobal)
+    print "  now eta = "+str(eta)
+    print "  now P = "+str(ps)+"s"
+    print "  now alpha = "+str(alpha)
    
 def peq():
    return pstar*(lam*mu**2/mdotglobal)**(3./7.)*2.**(-3./14.)
@@ -54,8 +54,9 @@ def rafun():
    
 def oin(rin, hin,mdotin):
     beta=hin/rin
-    print "beta= "+str(beta)+'\n'
-    print "rin= "+str(rin)+'\n'
+#    print "bocon.oin: mu = "+str(mu)
+#    print "beta= "+str(beta)+'\n'
+#    print "rin= "+str(rin)+'\n'
     if((beta*eta)>=0.9):
         beta=0.9/eta
     return rin**1.5/(1.-eta*beta)*(pstar/ps+2.*kt*lam*mu**2.*hin/rin**6./mdotin)

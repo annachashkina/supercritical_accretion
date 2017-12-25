@@ -43,10 +43,10 @@ from physics import xiinf, raffugen, peqgen
 
 def XQset(newxi, newqeq):
     global xiest, qeqest
+    print "XQ set"
     xiest=newxi
     qeqest=newqeq
 
-# setting the values of the global parameters:
 def parset(**kwargs):
 #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
     global mu, eta, ps, mdotglobal, alpha
@@ -228,10 +228,10 @@ def vrapper(arg):
 # main procedure searching the root
 
 def ordiv_smart(newmu, newmdot, newps):
-    global converged
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
-#    print 'here'
+    #    print 'here'
+    print "ordiv_smart mu = "+str(mu)
     print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)
     tstart=time.time()
     co=scipy.optimize.root(vrapper,(xiest,qeqest),method='hybr',jac=None,tol=1e-4,callback=None,options=None)
@@ -240,8 +240,8 @@ def ordiv_smart(newmu, newmdot, newps):
     print "co.x[1]= "+str(co.x[1])+' \n'
     print "calculation took "+str(tend-tstart)+"s = "+str((tend-tstart)/60.)+"min"
     if(not(co.success)):
-        converged=False
-    return co.x
+        print "ordiv_smart not coverged"
+    return co.x[0], co.x[1], co.success
 
 def corot(newmu, newmdot, newps,rrin,qeq):
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
