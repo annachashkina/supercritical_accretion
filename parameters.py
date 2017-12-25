@@ -20,8 +20,8 @@ eta=0.0 #accretion efficiency
 kt=0.5  # Btor/Bpol
 epsilon=0.5 #some fraction of the radiation that goes to accelerate the outflows
 psi=1. #accounts for the net angular momentum lost in the wind
-n=1. #vertical structure
-mmean=0.5 #mmean=m_particle/m_proton
+n=1. #vertical structure parameter, \rho \propto (1-(z/H)^2)^n
+mmean=0.6 #mmean=m_particle/m_proton (mmean=0.6 for completely ionized Solar-metallicity matter)
 #dimensionless coefficients
 lam=3.9848e10
 chi=8.8e-6/mmean
@@ -34,6 +34,7 @@ tol=1e-7
 toff=1e-12
 varold=0. #old temperature profile, n=1
 varnew=1. #new temperature profile with any n
-qeqest=0.905 #
-xiest=0.63 #
-defac=0.99
+qeqest=0.905 # initial estimate for qeq 
+xiest=0.63 # initial estimate for xi
+defac=0.99 # grid non-linearity parameter
+converged=True # an additional flag; turns False if ordiv fails to find the solution

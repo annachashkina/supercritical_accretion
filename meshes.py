@@ -4,22 +4,46 @@ from matplotlib import axes
 from numpy import *
 import time
 
-from parameters import all
+from parameters import *
 
 import bocon as b
 import dirin as d
 
 # functions:
-from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau
+from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau, xiinf
 from physics import Scal, Pcal, Qcal # SPQR
-# constants
-from physics import mu, ps, mdotglobal, alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert
+# from physics import mu, ps, mdotglobal, alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert 
 # more constants:
-from physics import tol, toff, varold, varnew, qeqest, xiest, defac
 from dirin import domega, dwrf, dtau, dtemp, dmdot
 import ssdisk as ss
 import readkit as rk
 
+# varying ps
+def varps(newmu, newmdot):
+    tstart=time.time()
+    d.XQset(0.5, 0.99)
+    ps1=b.peq()*10. ; psfac=0.9 ; newps=ps1
+    converged=True
+
+    psar=[] ; xar=[] ; qeqar=[]
+    f=open('varps.txt','w')
+    
+    while(converged):
+        b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+        d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+        x=d.ordiv_smart(newmu, newmdot, newps)
+        d.XQset(x[0], x[1])
+        print "varps: P = "+str(newps)+": "+str(x[0])+", "+str(x[1])
+        print str(xiest)+", "+str(qeqest)
+      
+        if(converged):
+            psar.append(newps) ; xar.append(x[0]) ; qeqar.append(x[1]) 
+        f.write(str(newps)+' '+str(xiest)+' '+str(qeqest)+'\n')
+        newps*=psfac
+        
+    f.close()
+    tend=time.time()
+        
 # a mu=const, ps=const mesh with variable mdot (former "experimental")
 def varmdot(newmu,newps): 
 
@@ -44,7 +68,50 @@ def varmdot(newmu,newps):
         print str(newmu)+' '+str(newmdot)+' '+str(xiest)+' '+str(qeqest)+'\n'
         
     f.close()
+    tend=time.time()
+    
+# a mdot=const, ps=const bisection search for magnetic moment
+def musearch(newmdot, newps): 
 
+    tstart=time.time()
+
+    d.XQset(0.4, 0.99)
+    f=open('musearch.txt','w')
+    newmu1=1. ; newmu2=100.
+
+    # right boundary, probably no solution here
+    b.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+    d.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+    x=d.ordiv_smart(newmu2, newmdot, newps)
+    if(converged):
+        print "musearch converged, unexpectedly increase your magnetic field"
+        print "mu = "+str(newmu2)
+        print "xi = "+str(x[0])+", qeq = "+str(x[1])
+        ii=raw_input("?")
+
+    xi=[] ; muu=[]
+    while((newmu2/newmu1-1.)>0.1):
+        newmu=sqrt(newmu1*newmu2)
+        b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+        d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+        x=d.ordiv_smart(newmu, newmdot, newps)
+        d.XQset(x[0], x[1])
+        if(converged):
+            newmu1=newmu
+        else:
+            newmu2=newmu
+        f.write(str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n')
+        print str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n'
+        xi.append(xiest)  ; muu.append(newmu)
+    f.close()
+    tend=time.time()
+
+    clf()
+    plot(muu, xi, '.k')
+    xlabel(r'$\mu$, $10^{30}$G')
+    ylabel(r'$\xi$')
+    savefig('musearch.eps')
+    
 def rmm(newps, neweta):
 
     d.XQset(0.4, 0.99)
