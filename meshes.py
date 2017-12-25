@@ -13,7 +13,6 @@ import dirin as d
 from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau, xiinf
 from physics import Scal, Pcal, Qcal # SPQR
 # from physics import mu, ps, mdotglobal, alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert 
-# more constants:
 from dirin import domega, dwrf, dtau, dtemp, dmdot
 import ssdisk as ss
 import readkit as rk
@@ -31,13 +30,13 @@ def varps(newmu, newmdot):
     while(converged):
         b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-        x=d.ordiv_smart(newmu, newmdot, newps)
-        d.XQset(x[0], x[1])
-        print "varps: P = "+str(newps)+": "+str(x[0])+", "+str(x[1])
+        x0, x1, converged=d.ordiv_smart(newmu, newmdot, newps)
+        d.XQset(x0, x1)
+        print "varps: P = "+str(newps)+": "+str(x0)+", "+str(x1)
         print str(xiest)+", "+str(qeqest)
       
         if(converged):
-            psar.append(newps) ; xar.append(x[0]) ; qeqar.append(x[1]) 
+            psar.append(newps) ; xar.append(x0) ; qeqar.append(x1) 
         f.write(str(newps)+' '+str(xiest)+' '+str(qeqest)+'\n')
         newps*=psfac
         
@@ -62,8 +61,8 @@ def varmdot(newmu,newps):
         newmdot=mdar[i]
         b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-        x=d.ordiv_smart(newmu, newmdot, newps)
-        d.XQset(x[0], x[1])
+        x0, x1, converged=d.ordiv_smart(newmu, newmdot, newps)
+        d.XQset(x0, x1)
         f.write(str(newmu)+' '+str(newmdot)+' '+str(xiest)+' '+str(qeqest)+'\n')
         print str(newmu)+' '+str(newmdot)+' '+str(xiest)+' '+str(qeqest)+'\n'
         
@@ -75,18 +74,20 @@ def musearch(newmdot, newps):
 
     tstart=time.time()
 
-    d.XQset(0.4, 0.99)
+    d.XQset(1.0, 0.99)
     f=open('musearch.txt','w')
     newmu1=1. ; newmu2=100.
 
     # right boundary, probably no solution here
-    b.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-    d.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-    x=d.ordiv_smart(newmu2, newmdot, newps)
+#    b.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+#    print "after bparset mu="+str(mu)
+#    d.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
+#    print "after parset mu="+str(mu)
+    x0, x1, converged=d.ordiv_smart(newmu2, newmdot, newps)
     if(converged):
-        print "musearch converged, unexpectedly increase your magnetic field"
+        print "musearch converged, unexpectedly;  increase your magnetic field"
         print "mu = "+str(newmu2)
-        print "xi = "+str(x[0])+", qeq = "+str(x[1])
+        print "xi = "+str(x0)+", qeq = "+str(x1)
         ii=raw_input("?")
 
     xi=[] ; muu=[]
@@ -94,15 +95,17 @@ def musearch(newmdot, newps):
         newmu=sqrt(newmu1*newmu2)
         b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-        x=d.ordiv_smart(newmu, newmdot, newps)
-        d.XQset(x[0], x[1])
+        x0, x1,converged=d.ordiv_smart(newmu, newmdot, newps)
         if(converged):
+            d.XQset(x0, x1)
+            xiest=d.xiest ; qeqest=d.qeqest
             newmu1=newmu
+            f.write(str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n')
+            print str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n'
+            xi.append(xiest)  ; muu.append(newmu)
         else:
             newmu2=newmu
-        f.write(str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n')
-        print str(newmu)+' '+str(xiest)+' '+str(qeqest)+'\n'
-        xi.append(xiest)  ; muu.append(newmu)
+            print str(newmu)+' '+" not converged"
     f.close()
     tend=time.time()
 
@@ -111,6 +114,7 @@ def musearch(newmdot, newps):
     xlabel(r'$\mu$, $10^{30}$G')
     ylabel(r'$\xi$')
     savefig('musearch.eps')
+    return muu[-1]
     
 def rmm(newps, neweta):
 
@@ -135,7 +139,8 @@ def rmm(newps, neweta):
     tauar=np.zeros([nmu,nd], dtype=double)+sqrt(-1.)
     raam=np.zeros([nmu,nd], dtype=double)+sqrt(-1.)
     mddotint=np.zeros([nmu,nd], dtype=double)+sqrt(-1.)
-
+    conv=np.zeros([nmu, nd], dtype=bool)
+    
     fname='rmm_op'+str(newps)+'_eta'+str(neweta)
     fout=open(fname+'.dat', 'w')
     
@@ -146,9 +151,12 @@ def rmm(newps, neweta):
         for kd in arange(nd):
             mu2[ku,kd]=muar[ku]
             md2[ku,kd]=mdar[kd]
-            xi[ku,kd],qeq[ku,kd]=d.ordiv_smart(muar[ku], mdar[kd], -newps)
+            xi[ku,kd],qeq[ku,kd],conv[ku,kd] =d.ordiv_smart(muar[ku], mdar[kd], -newps)
             if(kd>0):
                 d.XQset(xi[ku,kd], qeq[ku,kd]) # 
+            if(not(conv[ku,kd])):
+                xi[ku,kd]=sqrt(-1)
+                qeq[ku,kd]=sqrt(-1)
             print "xi (mu="+str(muar[ku])+", mdot="+str(mdar[kd])+") = "+str(xi[ku,kd])
             #            oin,hin,tin,bmax,mdotint,ll=d.rastr(xi[ku,kd], qeq[ku,kd])
             oar[ku,kd]=oin

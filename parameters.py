@@ -30,11 +30,11 @@ pstar=4.33e-5
 tvert=219./1024. #vertical structure n=1
 hvert=sqrt(5.)  #vertical structure n=1
 #program coefficients
-tol=1e-7 
+tol=1e-5
 toff=1e-12
 varold=0. #old temperature profile, n=1
 varnew=1. #new temperature profile with any n
 qeqest=0.905 # initial estimate for qeq 
 xiest=0.63 # initial estimate for xi
 defac=0.99 # grid non-linearity parameter
-converged=True # an additional flag; turns False if ordiv fails to find the solution
+
