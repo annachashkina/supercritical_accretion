@@ -84,7 +84,7 @@ def musearch(newmdot, newps):
     d.parset(newmu=newmu2, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
     x=d.ordiv_smart(newmu2, newmdot, newps)
     if(converged):
-        print "musearch converged, unexpectedly; increase your magnetic field"
+        print "musearch converged, unexpectedly increase your magnetic field"
         print "mu = "+str(newmu2)
         print "xi = "+str(x[0])+", qeq = "+str(x[1])
         ii=raw_input("?")
@@ -108,8 +108,8 @@ def musearch(newmdot, newps):
 
     clf()
     plot(muu, xi, '.k')
-    xlabel('$\mu$, $10^{30}$G')
-    ylabel('$\xi$')
+    xlabel(r'$\mu$, $10^{30}$G')
+    ylabel(r'$\xi$')
     savefig('musearch.eps')
     
 def rmm(newps, neweta):
