@@ -74,7 +74,7 @@ def musearch(newmdot, newps):
 
     tstart=time.time()
 
-    d.XQset(1.0, 0.99)
+    d.XQset(2.0, 1.5)
     f=open('musearch.txt','w')
     newmu1=1. ; newmu2=100.
 
@@ -91,7 +91,7 @@ def musearch(newmdot, newps):
         ii=raw_input("?")
 
     xi=[] ; muu=[]
-    while((newmu2/newmu1-1.)>0.1):
+    while((newmu2/newmu1-1.)>0.01):
         newmu=sqrt(newmu1*newmu2)
         b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)

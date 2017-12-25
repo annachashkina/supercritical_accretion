@@ -142,9 +142,6 @@ def rastr(rrin, qeq):
         r1=r+dr/2.
         h=hvert*sqrt(r**3*wrf/alpha/tau)
         
-        if(isnan(tau)):
-            print "tausolve resulted in NaN"
-            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         omega1=omega+domega(omega,r,tau,mdot,wrf,tc)*dr/2.
         wrf1=wrf+dwrf(tau,omega,r)*dr/2.
         tau1=tau+dtau(tau,tc,wrf,r,omega,mdot)*dr/2.
@@ -157,15 +154,16 @@ def rastr(rrin, qeq):
             mdot1=mdot
  
         if(wrf1<=0.):
-            print "negative stress! wrf = "+str(wrf1)
-            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.)  
-
-     
+            print "negative stress! wrf = "+str(wrf1)+" at R = "+str(r/rin)+"Rin"
+            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.)
+        
 #        h1=fh(wrf1,r1,tc1)
         h1=hvert*sqrt(r1**3*wrf1/alpha/tau1)
         
-        if(isnan(tau1)):
-            print "tausolve resulted in NaN"
+        if(not(isfinite(tau1))):
+            print "tausolve resulted in NaN at R = "+str(r/rin)+"Rin"
+            print "tau_previous(tau) = "+str(tau)
+            print "wrf = "+str(wrf)
             return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         oprev=omega
         omega=omega+domega(omega1,r1,tau1,mdot1,wrf1,tc1)*dr
@@ -176,6 +174,11 @@ def rastr(rrin, qeq):
  #       tau=ftau(wrf,r,tc)
         tauprev=tau
         tau=tau+dtau(tau1,tc1,wrf1,r1,omega1,mdot1)*dr
+        if(not(isfinite(tau))):
+            print "tausolve resulted in NaN at R = "+str(r/rin)+"Rin"
+            print "tau_previous(tau1) = "+str(tau1)
+            print "wrf = "+str(wrf1)
+            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
 
         hprev=h
 ##        h=fh(wrf,r,tc)
@@ -212,9 +215,14 @@ def doffwrfin(xi,qeq):
     omegaBC=b.oin(rin, hin,mdotin)
     wrfBC=b.fwrfin(rin, hin,mdotin)
     print "oin-omegaBC "+str(oin-omegaBC)+" wrfin-wrfBC "+str(wrfin-wrfBC)+'\n' 
- #   tauBC, hBC, omegaBC, wrfBC = b.tausolve(xi, mdotin)
- #   print 'here2'
-    return oin-omegaBC, wrfin-wrfBC
+    #   tauBC, hBC, omegaBC, wrfBC = b.tausolve(xi, mdotin)
+    #   print 'here2'
+    # all the NaN event result from wrfin<0, => second output should be <0, let us set it to -1.
+    if(isnan(wrfin)):
+        print "doffwrfin warning: wrf sign change"
+        return 0., -1.
+    else:
+        return oin-omegaBC, wrfin-wrfBC
 # wrapper for root calculation
 def vrapper(arg):
     xi=arg[0]
