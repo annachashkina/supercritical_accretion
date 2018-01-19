@@ -32,7 +32,11 @@ def lgmax(x):
     return 10.**y
 
 # disc integration with a bunch of figures
-def rastr1(rrin, qeq):
+def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
+
+    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    
     ra=b.rafun()
     rin=ra*rrin
 #    print rin
@@ -40,7 +44,7 @@ def rastr1(rrin, qeq):
     t=1
     rout=100.*rin
     ddr=-3.e-5
-    mdot=mdotglobal
+    mdot=d.mdotglobal ;   mu=d.mu
     print "rastr1: mdot= "+str(mdot)+" mu= "+str(mu)+" \n"
 #    huh=raw_input()
     
@@ -251,7 +255,7 @@ def rastr1(rrin, qeq):
     plot(rar*rin*rrin*206746., qadv/qplus, color='red',label='Qadv/Qvis')
     plot(rar*rin*rrin*206746., qrad/qplus, color='green',label='Qrad/Qvis')
  #   xlim(0.01,5.e10)
-    ylabel('$P$')
+    ylabel('flux ratios')
     xlabel('$r$')
 #    yscale('log')
     xscale('log')
