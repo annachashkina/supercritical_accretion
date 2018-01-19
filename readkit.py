@@ -8,7 +8,7 @@ from scipy.integrate import *
 from scipy.interpolate import *
 from scipy.optimize import curve_fit
 
-from parameters import all
+from parameters import *
 
 #Uncomment the following if you want to use LaTeX in figures 
 rc('font',**{'family':'serif','serif':['Times']})
@@ -458,3 +458,53 @@ def sigma_curve():
     savefig('sigma_curve.eps')
 
     return 0.
+
+
+def rmmread_all(fname):
+    fin=open(fname+'.txt', 'r')
+
+    s=str.split(str.strip(fin.readline()))
+    
+    mu2=[]
+    md2=[]
+    xi=[]
+    qeq=[]
+    oint=[]
+    hint=[]
+    htormax=[]
+    mdotin=[]
+    wint=[]
+
+    while(s):
+        if(size(s)>=4):
+            mu2.append(s[0])
+            md2.append(s[1])
+            xi.append(s[2])
+            qeq.append(s[3])
+            oint.append(s[4])
+            hint.append(s[5])
+            htormax.append(s[6])
+            mdotin.append(s[7])
+            wint.append(s[8])
+    
+        s=str.split(str.strip(fin.readline()))
+    fin.close()
+
+
+    mmu2=asarray(mu2, dtype=double)
+    mmd2=asarray(md2, dtype=double)
+    mxi=asarray(xi, dtype=double)
+    mqeq=asarray(qeq, dtype=double)
+    moint=asarray(oint, dtype=double)
+    mhint=asarray(hint, dtype=double)
+    mhtormax=asarray(htormax, dtype=double)
+    mmdotin=asarray(mdotin, dtype=double)
+    mwint=asarray(wint, dtype=double)
+
+    mrin=(lam*mmu2**2/mmd2)**(2./7.)*2.**(-1./7.)*mxi
+
+    madvterm=3.*mmdotin*mhint/(5.*mrin**2.)
+
+    return mmu2,mmd2,mxi,mqeq,moint,mhint,mhtormax,mmdotin/mmd2,mwint,madvterm
+
+

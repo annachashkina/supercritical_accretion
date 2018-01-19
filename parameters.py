@@ -11,8 +11,8 @@ import scipy.optimize
 import scipy.special
 
 #physical parameters
-mu=10. #magnetic moment in units 10^30 G cm^3
-ps=10. # spin period in seconds
+mu=1. #magnetic moment in units 10^30 G cm^3
+ps=100. # spin period in seconds
 mdotglobal=1000. #accretion rate in units 4 pi G M/ (c\kappa)
 #coefficients
 alpha=0.1 #viscosity

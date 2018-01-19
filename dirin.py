@@ -107,12 +107,20 @@ def dtemp(tau,tc,wrf,r,omega,mdot):
 # main disc integration outside in
 def rastr(rrin, qeq):
     # rrin = xi, the inner disc radius in rA units, qeq
+
+
     ra=b.rafun()
     rin=ra*rrin
     t=1
     rout=100.*rin
     ddr=-1.e-4
     mdot=mdotglobal
+
+    ps=10.*peqgen(mu,mdot)
+
+    print "rastr_mdotglobal= "+str(mdotglobal)+'\n'
+    print "rastr_mu= "+str(mu)+'\n'
+ 
     
     if(mdot<1.5):
         ddr*=(mdot/1.5)
@@ -151,7 +159,8 @@ def rastr(rrin, qeq):
         tc1=tc+dtemp(tau,tc,wrf,r,omega,mdot)*dr/2.
         beta1=beta(tau1,tc1,wrf1)
         
-        if((r*r)>(9.*tau/(4.*64.*pi*tc**4.))):
+ #       if((r*r)>(9.*tau/(4.*64.*pi*tc**4.))):
+        if(r<h):
             mdot1=mdot+dmdot(r,tc,tau)*dr/2.
         else:
             mdot1=mdot
@@ -179,7 +188,8 @@ def rastr(rrin, qeq):
 
         hprev=h
 ##        h=fh(wrf,r,tc)
-        if((r1*r1)>(9.*tau1/(4.*64.*pi*tc1**4.))):
+ #       if((r1*r1)>(9.*tau1/(4.*64.*pi*tc1**4.))):
+        if(r<h1)
             mdot=mdot+dmdot(r1,tc1,tau1)*dr
         rprev=r
         r+=dr
@@ -201,7 +211,7 @@ def rastr(rrin, qeq):
     wrf_in=b.fwrfin(rin, hint,mdotin)
 #    print "rastr: omega = "+str(omega)+"; h = "+str(h)+"; htormax = "+str(htormax)+"; mdotin = "+str(mdot)+"; wrf = "+str(wrf)+"\n"
 #    print "rastr: omega_in = "+str(omega_in)+"; h_in = "+str(hint)+" ; wrf_in = "+str(wrf)+"\n"
-
+    print str(oint)+' '+str(hint)+' '+str(tint)+' '+str(htormax)+' '+str(mdotin)+' '+str(wint)+'\n'
     return oint, hint, tint, htormax, mdotin, wint
 # criterion for the boundary conditions -- do we fit them?
 

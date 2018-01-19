@@ -37,7 +37,7 @@ def parset(**kwargs):
     alpha=kwargs['newalpha']
 
     if(ps<0.):
-        ps=-ps*b.peq()
+        ps=-ps*peq()
 
     print "bocon parset:"
     print "  now mu = "+str(mu)
