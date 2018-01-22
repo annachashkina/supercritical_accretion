@@ -26,8 +26,7 @@ import os
 import bocon as b
 import physics as f
 # import ssdisk as ss
-# import readkit as rk
-# import readkit as rk
+# import readkit as r# import readkit as rk
 
 from parameters import *
 # functions:
@@ -46,6 +45,11 @@ def XQset(newxi, newqeq):
     print "XQ set"
     xiest=newxi
     qeqest=newqeq
+
+def routset(newrautfactor):
+    global routfactor
+    routfactor = newrautfactor
+    print "rout = "+str(routfactor)+" * rin"
 
 def parset(**kwargs):
 #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
@@ -108,15 +112,15 @@ def dtemp(tau,tc,wrf,r,omega,mdot):
 def rastr(rrin, qeq):
     # rrin = xi, the inner disc radius in rA units, qeq
 
-
     ra=b.rafun()
     rin=ra*rrin
     t=1
-    rout=100.*rin
+    rout=routfactor*rin
+    print "rastr: rout = "+str(routfactor)+" rin"
     ddr=-1.e-4
     mdot=mdotglobal
 
-    ps=10.*peqgen(mu,mdot)
+#    ps=10.*peqgen(mu,mdot)
 
     print "rastr_mdotglobal= "+str(mdotglobal)+'\n'
     print "rastr_mu= "+str(mu)+'\n'
@@ -137,10 +141,14 @@ def rastr(rrin, qeq):
     wprev=wrf
 #    tc=0.00486297109754*tcqeq
     tau=4./chi**0.8*(pi/9.)**0.2*mdot**0.6/alpha**0.8/rout**0.6*(1.-qeq*(rin/rout)**0.5)**0.6
- #   tau=ftau(wrf,r,tc)
+    print "n="+str(n)
     h=hvert*sqrt(r**3*wrf/alpha/tau)
     tc=b.ctemp(h,wrf,tau)
-    
+    print "Tc="+str(tc)
+#    tc=(2.*n+3.)/2./(n+1.)*wrf/chi/alpha/tau
+#    print "Tc="+str(tc)
+#    rr=raw_input("k")
+    # tau=ftau(wrf,r,tc)
     hprev=h
     tauprev=tau
     tprev=tc
@@ -189,7 +197,7 @@ def rastr(rrin, qeq):
         hprev=h
 ##        h=fh(wrf,r,tc)
  #       if((r1*r1)>(9.*tau1/(4.*64.*pi*tc1**4.))):
-        if(r<h1)
+        if(r<h1):
             mdot=mdot+dmdot(r1,tc1,tau1)*dr
         rprev=r
         r+=dr
@@ -237,9 +245,10 @@ def vrapper(arg):
     return (a,b)
 # main procedure searching the root
 
-def ordiv_smart(newmu, newmdot, newps):
+def ordiv_smart(newmu, newmdot, newps, routscale=routfactor):
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    routset(routscale)
     #    print 'here'
     print "ordiv_smart mu = "+str(mu)
     print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)

@@ -47,10 +47,10 @@ def parset(**kwargs):
     print "  now alpha = "+str(alpha)
    
 def peq():
-   return pstar*(lam*mu**2/mdotglobal)**(3./7.)*2.**(-3./14.)
+    return pstar*(lam*mu**2/mdotglobal)**(3./7.)*2.**(-3./14.)
    
 def rafun():
-   return (lam*mu**2/mdotglobal)**(2./7.)*2.**(-1./7.)
+    return (lam*mu**2/mdotglobal)**(2./7.)*2.**(-1./7.)
    
 def oin(rin, hin,mdotin):
     beta=hin/rin
@@ -90,7 +90,7 @@ def quartic(c1,c2):
 
 def ctemp(h, wrf, tau):
     c1=-45./256./pi/alpha * wrf/h
-    c2=9./32./pi*chi * tau/h
+    c2=9./64./pi*chi * tau/h
     t=quartic(c1,c2)
     return t
 

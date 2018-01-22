@@ -6,7 +6,7 @@ import os
 import bocon as b
 import dirin as d
 from matplotlib import *
-from matplotlib.colors import *
+from matplotlib.colors import BoundaryNorm
 
 from parameters import *
 
@@ -436,7 +436,7 @@ def rmmplot(fname):
 
     mu2,md2,xi,qeq=rk.rmmread(fname)
     print mu2
-    nkj=raw_input()
+#    nkj=raw_input()
     wuu=unique(mu2)
     wdd=unique(md2)
     nuu=size(wuu)
@@ -451,9 +451,8 @@ def rmmplot(fname):
     qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
 
     levs=asarray([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
-    norm = colors.BoundaryNorm(boundaries=levs, ncolors=256)
+    norm = BoundaryNorm(boundaries=levs, ncolors=256)
 
- 
     plt.clf()
     fig=plt.figure()
     plt.contourf(muar, mdar, xiar,levels=levs,cmap='jet') #,levels=rlev)

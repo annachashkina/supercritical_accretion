@@ -11,9 +11,9 @@ import scipy.optimize
 import scipy.special
 
 #physical parameters
-mu=1. #magnetic moment in units 10^30 G cm^3
+mu=0. #magnetic moment in units 10^30 G cm^3
 ps=100. # spin period in seconds
-mdotglobal=1000. #accretion rate in units 4 pi G M/ (c\kappa)
+mdotglobal=0. #accretion rate in units 4 pi G M/ (c\kappa)
 #coefficients
 alpha=0.1 #viscosity
 eta=0.0 #accretion efficiency 
@@ -30,11 +30,11 @@ pstar=4.33e-5
 tvert=219./1024. #vertical structure n=1
 hvert=sqrt(5.)  #vertical structure n=1
 #program coefficients
-tol=1e-5
+tol=1e-6
 toff=1e-12
 varold=0. #old temperature profile, n=1
 varnew=1. #new temperature profile with any n
 qeqest=0.905 # initial estimate for qeq 
 xiest=0.63 # initial estimate for xi
-defac=0.99 # grid non-linearity parameter
-
+defac=0.9 # grid non-linearity parameter
+routfactor=100. # outer, starting, radius in inner radius units

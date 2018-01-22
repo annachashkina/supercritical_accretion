@@ -17,6 +17,60 @@ from dirin import domega, dwrf, dtau, dtemp, dmdot
 import ssdisk as ss
 import readkit as rk
 
+def xiqeqplane():
+    newmu=1. ; newmdot=10. ; newps=-10.
+    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    xi1=0.5 ; xi2=1.5 ; nxi=17
+    xi=(xi2-xi1)*np.arange(nxi)/double(nxi-1)+xi1
+    qeq1=0.2 ;  qeq2=1.2 ; nq=21
+    qeq=(qeq2-qeq1)*np.arange(nq)/double(nq-1)+qeq1
+    aar=np.zeros([nxi, nq], dtype=double)
+    bar=np.zeros([nxi, nq], dtype=double)
+    x2=np.zeros([nxi, nq], dtype=double)
+    q2=np.zeros([nxi, nq], dtype=double)
+    fout=open('xqout.txt', 'w')
+    for kx in np.arange(nxi):
+        for kq in np.arange(nq):
+            at,bt=d.vrapper([xi[kx], qeq[kq]])
+            aar[kx,kq]=at ; bar[kx,kq]=bt
+            x2[kx,kq]=xi[kx] ; q2[kx,kq]=qeq[kq]
+            fout.write(str(xi[kx])+' '+str(qeq[kq])+' '+str(at)+' '+str(bt)+'\n')
+            fout.flush()
+    fout.close()
+    clf()
+    contourf(x2, q2, np.log(aar**2+bar**2),nlevels=20)
+    colorbar()
+    contour(x2, q2, aar, levels=[0.], colors='w')
+    contour(x2, q2, bar, levels=[0.], colors='k')
+    savefig('xiqeqmap.eps')
+    
+# varying rout test:
+def varrout():
+    newmu=1. ; newmdot=10.
+    d.XQset(0.5, 0.99)
+
+    rmin=2. ; rmax=2000. ; nrads=5
+    rr=(rmax/rmin)**(np.arange(nrads)/double(nrads-1))*rmin
+    xiar=np.zeros(nrads, dtype=double)
+    qeqar=np.zeros(nrads, dtype=double)
+    fout=open('varrout.txt', 'w')
+    for k in np.arange(nrads):
+        thp=d.ordiv_smart(newmu, newmdot, -10., routscale=rr[k])
+        xiar[k]=thp[0] ; qeqar[k]=thp[1]
+        if(thp[2]):
+            d.XQset(xiar[k], qeqar[k])
+            print "xi = "+str(xiar[k])
+            fout.write(str(rr[k])+' '+str(xiar[k])+' '+str(qeqar[k])+'\n')
+            fout.flush()
+    fout.close()
+    clf()
+    plot(rr, xiar, '.k')
+    xscale('log')
+    xlabel(r'$R_{\rm in}/R_{\rm out}$')
+    ylabel(r'$\xi$')
+    savefig('xrouttest.eps')
+    
 # varying ps
 def varps(newmu, newmdot):
     tstart=time.time()
