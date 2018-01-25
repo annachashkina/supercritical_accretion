@@ -20,7 +20,8 @@ def par0(xs, ys):
 
 # gas to total pressure
 def beta(tau,tc,wrf):
-    return chi*alpha*tau*tc/wrf*2.*(n+1.)/(2.*n+3.)
+    b=chi*alpha*tau*tc/wrf*2.*(n+1.)/(2.*n+3.)
+    return b/sqrt(1.+b**2)
 
 def comegaga(tc,tau,r,wrf):
     return 64.*pi/3.*G(n)*(n+1.)*tc**4./(tau*r*wrf)
