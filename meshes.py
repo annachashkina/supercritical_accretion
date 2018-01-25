@@ -21,9 +21,9 @@ def xiqeqplane():
     newmu=1. ; newmdot=10. ; newps=-10.
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
-    xi1=0.5 ; xi2=1.5 ; nxi=17
+    xi1=0.2 ; xi2=1.2 ; nxi=11
     xi=(xi2-xi1)*np.arange(nxi)/double(nxi-1)+xi1
-    qeq1=0.2 ;  qeq2=1.2 ; nq=21
+    qeq1=0.2 ;  qeq2=1.2 ; nq=10
     qeq=(qeq2-qeq1)*np.arange(nq)/double(nq-1)+qeq1
     aar=np.zeros([nxi, nq], dtype=double)
     bar=np.zeros([nxi, nq], dtype=double)
@@ -38,11 +38,14 @@ def xiqeqplane():
             fout.write(str(xi[kx])+' '+str(qeq[kq])+' '+str(at)+' '+str(bt)+'\n')
             fout.flush()
     fout.close()
+    xi0,qeq0, conv = d.ordiv_smart(newmu, newmdot, newps)
     clf()
     contourf(x2, q2, np.log(aar**2+bar**2),nlevels=20)
     colorbar()
     contour(x2, q2, aar, levels=[0.], colors='w')
     contour(x2, q2, bar, levels=[0.], colors='k')
+    if(conv):
+        plot(xi0, qeq0, 'or')
     savefig('xiqeqmap.eps')
     
 # varying rout test:
@@ -171,15 +174,37 @@ def musearch(newmdot, newps):
     print "musearch took "+str(tend-tstart)
     return muu[-1]
     
+# two-dimensional mesh computed on top of existing, with different ps and/or eta
+def rmmclone(inspirefile, newps, neweta):
+
+    tstart=time.time()
+    #    muar=[] ; mdar=[] ; xi0ar=[] ; qeq0ar=[]; xiar=[] ; qeqar=[]
+    
+    muar, mdar, xi0ar, qeq0ar = rk.rmmread(inspirefile)
+    nn=np.size(muar)
+    xiar=np.zeros(nn, dtype=double) ;   qeqar=np.zeros(nn, dtype=double)
+    fout=open(inspirefile+'_eta'+str(neweta), 'w')
+    for kk in np.arange(nn):
+        d.XQset(xi0ar[kk], qeq0ar[kk])
+        xiar[kk],qeqar[kk],conv[kk] =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta)
+        fout.write(str(muar[ku])+' '+str(mdar[kd])+' '+str(xi[ku,kd])+' '+str(qeq[ku,kd])+'\n ')
+        print str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar[kk])+' '+str(qeqar[kk])+'\n '
+        print "Delta xi = "+str(xiar[kk]-xi0ar[kk])
+        fout.flush()
+    fout.close()
+    tend=time.time()
+    print "RMMclone: the grid took "+str(tend-tstart)+"s = "+str((tend-tstart)/3600.)+"h"
+
+# two-dimensional mesh for fixed Ps (or Ps/Peq, if newps<0) and eta
 def rmm(newps, neweta):
 
-    d.XQset(1.0, 0.9)
+    d.XQset(0.4, 0.9)
 
     tstart=time.time()
 
     mumin=1. ;   mumax=100.
     mdmin=10. ;    mdmax=10000.
-    nmu=15 ;    nd=16
+    nmu=17 ;    nd=16
 
     muar=(mumax/mumin)**(arange(nmu)/double(nmu-1))*mumin
     mdar=(mdmax/mdmin)**(arange(nd)/double(nd-1))*mdmin
@@ -205,7 +230,7 @@ def rmm(newps, neweta):
         for kd in arange(nd):
             mu2[ku,kd]=muar[ku]
             md2[ku,kd]=mdar[kd]
-            xi[ku,kd],qeq[ku,kd],conv[ku,kd] =d.ordiv_smart(muar[ku], mdar[kd], -newps)
+            xi[ku,kd],qeq[ku,kd],conv[ku,kd] =d.ordiv_smart(muar[ku], mdar[kd], -newps, neweta=neweta)
             if(conv[ku,kd]):
                 d.XQset(xi[ku,kd], qeq[ku,kd]) # 
             if(not(conv[ku,kd])):

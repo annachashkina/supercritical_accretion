@@ -245,9 +245,9 @@ def vrapper(arg):
     return (a,b)
 # main procedure searching the root
 
-def ordiv_smart(newmu, newmdot, newps, routscale=routfactor):
-    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
-    parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+def ordiv_smart(newmu, newmdot, newps, routscale=routfactor, neweta=0.):
+    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=neweta,newalpha=0.1)
+    parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=neweta,newalpha=0.1)
     routset(routscale)
     #    print 'here'
     print "ordiv_smart mu = "+str(mu)

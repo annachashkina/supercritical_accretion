@@ -226,15 +226,6 @@ def rmmread(fname):
     md2=[]
     xi=[]
     o=[]
-    htor=[]
-    tau=[]
-    mu20=[]
-    md20=[]
-    xi0=[]
-    o0=[]
-    htor0=[]
-    tau0=[]
-    tau1=[]
 
     while(s):
         if(size(s)>=4):
@@ -242,28 +233,16 @@ def rmmread(fname):
             md2.append(s[1])
             xi.append(s[2])
             o.append(s[3])
-            htor.append(s[0])
-            tau.append(s[1])
-            mu20.append(s[0])
-            md20.append(s[1])
-            xi0.append(s[0])
-            o0.append(s[1])
-            htor0.append(s[0])
-            tau0.append(s[1])
-            tau1.append(s[2])
         s=str.split(str.strip(fin.readline()))
     fin.close()
-
-
+    print np.size(mu2)
+    print np.size(md2)
     mmu2=asarray(mu2, dtype=double)
     mmd2=asarray(md2, dtype=double)
     mxi=asarray(xi, dtype=double)
     mo=asarray(o, dtype=double)
  
-
     return mmu2,mmd2,mxi,mo
-
-
 
 
 def per():
