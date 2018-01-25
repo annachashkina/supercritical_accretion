@@ -182,14 +182,14 @@ def rmmclone(inspirefile, newps, neweta):
     
     muar, mdar, xi0ar, qeq0ar = rk.rmmread(inspirefile)
     nn=np.size(muar)
-    xiar=np.zeros(nn, dtype=double) ;   qeqar=np.zeros(nn, dtype=double)
+#    xiar=np.zeros(nn, dtype=double) ;   qeqar=np.zeros(nn, dtype=double)
     fout=open(inspirefile+'_eta'+str(neweta), 'w')
     for kk in np.arange(nn):
         d.XQset(xi0ar[kk], qeq0ar[kk])
-        xiar[kk],qeqar[kk],conv[kk] =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta)
-        fout.write(str(muar[ku])+' '+str(mdar[kd])+' '+str(xi[ku,kd])+' '+str(qeq[ku,kd])+'\n ')
-        print str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar[kk])+' '+str(qeqar[kk])+'\n '
-        print "Delta xi = "+str(xiar[kk]-xi0ar[kk])
+        xiar,qeqar,conv =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta)
+        fout.write(str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n ')
+        print str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n '
+        print "Delta xi = "+str(xiar-xi0ar[kk])
         fout.flush()
     fout.close()
     tend=time.time()
