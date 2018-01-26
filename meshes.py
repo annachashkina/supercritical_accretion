@@ -17,6 +17,46 @@ from dirin import domega, dwrf, dtau, dtemp, dmdot
 import ssdisk as ss
 import readkit as rk
 
+def varpsi():
+    newmu=1. ; newmdot=10. ; newps=-10.
+    b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
+    d.XQset(0.49, 5.6)
+    psi1=1.42 ; psidiff=0.05 ; psi2=30.
+    d.psiset(psi1)
+
+    fout=open('psivar.dat', 'w+')
+    xiar=[] ; psiar=[] ;  qeqar=[]
+    converged=True
+    while(converged&(psi1<psi2)):
+        thp=d.ordiv_smart(newmu, newmdot, newps)
+        xi=thp[0] ; qeq=thp[1]
+        converged=thp[2]
+        if(converged):
+            d.XQset(xi, qeq)
+            xiar.append(xi) ; psiar.append(psi1) ; qeqar.append(qeq)
+            print "xi = "+str(xi)
+            fout.write(str(psi1)+' '+str(xi)+' '+str(qeq)+'\n')
+            fout.flush()
+            psi1+=psidiff
+            d.psiset(psi1)
+    fout.close()
+    xiar=asarray(xiar, dtype=double) ; qeqar=asarray(qeqar, dtype=double) ; psiar=asarray(psiar, dtype=double)
+    clf()
+    subplot(2,1,1)
+    plot(psiar, xiar, '.k')
+    xscale('log')
+    #    xlabel(r'$\psi$')
+    ylabel(r'$\xi$')
+    subplot(2,1,2)
+    plot(psiar, qeqar, '.k')
+    xscale('log')
+    xlabel(r'$\psi$')
+    ylabel(r'$q$')
+    savefig('psivar.eps')
+    
+    
+# track the solution on the xi-qeq plane
 def xiqeqplane():
     newmu=1. ; newmdot=10. ; newps=-10.
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
@@ -183,9 +223,10 @@ def rmmclone(inspirefile, newps, neweta):
     muar, mdar, xi0ar, qeq0ar = rk.rmmread(inspirefile)
     nn=np.size(muar)
 #    xiar=np.zeros(nn, dtype=double) ;   qeqar=np.zeros(nn, dtype=double)
-    fout=open(inspirefile+'_eta'+str(neweta), 'w')
+    fout=open(inspirefile+'_eta'+str(neweta)+'.txt', 'w')
     for kk in np.arange(nn):
         d.XQset(xi0ar[kk], qeq0ar[kk])
+        print "xi estimate = "+str(xi0ar[kk])
         xiar,qeqar,conv =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta)
         fout.write(str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n ')
         print str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n '

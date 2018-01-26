@@ -46,6 +46,11 @@ def XQset(newxi, newqeq):
     xiest=newxi
     qeqest=newqeq
 
+def psiset(newpsi):
+    global psi
+    psi=newpsi
+    print "now psi = "+str(psi)
+    
 def routset(newrautfactor):
     global routfactor
     routfactor = newrautfactor
@@ -230,8 +235,8 @@ def doffwrfin(xi,qeq):
     omegaBC=b.oin(rin, hin,mdotin)
     wrfBC=b.fwrfin(rin, hin,mdotin)
     print "oin-omegaBC "+str(oin-omegaBC)+" wrfin-wrfBC "+str(wrfin-wrfBC)+'\n' 
- #   tauBC, hBC, omegaBC, wrfBC = b.tausolve(xi, mdotin)
- #   print 'here2'
+    #   tauBC, hBC, omegaBC, wrfBC = b.tausolve(xi, mdotin)
+    #    print 'eta = '+str(eta)
     return oin-omegaBC, wrfin-wrfBC
 # wrapper for root calculation
 def vrapper(arg):
