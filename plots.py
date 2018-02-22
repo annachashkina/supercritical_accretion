@@ -425,10 +425,12 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     wrf_in=b.fwrfin(rin, hint,mdotin)
 #    print wrf_in
 #    jjoij=raw_input()
+
     
     print "rastr1: omega = "+str(omega)+"; h = "+str(h)+"; htormax = "+str(htormax)+"; mdotin = "+str(mdot)+"; wrf = "+str(wrf)+"\n"
     print "rastr1: omega_in = "+str(omega_in)+"; h_in = "+str(h_in)+" ; wrf_in = "+str(wrf)+"\n"
-
+    print "mdoyin= "+str(mdotin)+' \n'
+    huh=raw_input()
     return rar*rin, tauar
 
 # plots only xi and qeq
@@ -492,79 +494,77 @@ def rmmplot(fname):
 # difference in xi for different eta values
 def difeta():
 
-    fname='rmm_exp'
-    fname1='rmm_exp_eta1'
-    mu2,md2,xi,qeq=rk.rmmread(fname)
-    print mu2
-    nkj=raw_input()
+    fname='rmm_eta_00_ps10peq_ready'
+    fname1='rmm_eta0.1_p10eq_ready'
+
+    mu2,md2,xi,qeq,oint,hint,htormax,mdotin,wint,madvterm=rk.rmmread_all(fname)
+
     wuu=unique(mu2)
     wdd=unique(md2)
     nuu=size(wuu)
     ndd=size(wdd)
+
+    muar1=reshape(asarray(mu2,dtype=double),[nuu,ndd])
+    mdar1=reshape(asarray(md2,dtype=double),[nuu,ndd])
+    xiar1=reshape(asarray(xi,dtype=double),[nuu,ndd])
+
+    muar_f1=muar1[::1,::50]
+    mdar_f1=mdar1[::1,::50]
+    xiar_f1=xiar1[::1,::50]
+
+    mu22,md22,xi2,qeq2,oint2,hint2,htormax2,mdotin2,wint2,madvterm2=rk.rmmread_all(fname1)
+
+    wuu=unique(mu22)
+    wdd=unique(md22)
+    nuu=size(wuu)
+    ndd=size(wdd)
+
+    muar12=reshape(asarray(mu22,dtype=double),[nuu,ndd])
+    mdar12=reshape(asarray(md22,dtype=double),[nuu,ndd])
+    xiar12=reshape(asarray(xi2,dtype=double),[nuu,ndd])
+
+    muar_f2=muar12[::1,::50]
+    mdar_f2=mdar12[::1,::50]
+    xiar_f2=xiar12[::1,::50]
+
+    deltaxi=xiar_f2-xiar_f1
+
     
-    print nuu
-    print ndd
 
-    muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
-    mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
-    xiar=reshape(asarray(xi,dtype=double),[nuu,ndd])
-    qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
- 
-    mu21,md21,xi1,qeq1=rk.rmmread(fname1)
+    levs=np.arange(0.1,0.6,0.001)
 
-    wuu1=unique(mu21)
-    wdd1=unique(md21)
-    nuu1=size(wuu1)
-    ndd1=size(wdd1)
-    
-    print nuu1
-    print ndd1
-
-    muar1=reshape(asarray(mu21,dtype=double),[nuu1,ndd1])
-    mdar1=reshape(asarray(md21,dtype=double),[nuu1,ndd1])
-    xiar1=reshape(asarray(xi1,dtype=double),[nuu1,ndd1])
-    qeqar1=reshape(asarray(qeq1,dtype=double),[nuu1,ndd1])
-
-    levs=asarray([0.001,0.002,0.006,0.016,0.042,0.100,0.300,0.320])
-    norm = colors.BoundaryNorm(boundaries=levs, ncolors=256)
-    
- #   norm=LogNorm(vmin=levs.min(), vmax=levs.max())
-    plt.clf()
-    fig=plt.figure()
-    plt.contourf(muar, mdar, xiar1-xiar,norm=norm, levels=levs,cmap='jet')
-    #title(r'$\Delta \xi$')
-    c=plt.colorbar()
- #   plt.cmaps=[]
-    plt.xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-    #tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)#
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
- #   fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_xi_dif.pdf')
 
     plt.clf()
     fig=plt.figure()
-    plt.contourf(muar, mdar, qeqar-qeqar1) #,levels=rlev)
-    #title(r'$qeq$')
-    c=plt.colorbar()
-    plt.xlabel('$\Delta qeq$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
- #   tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_qeq_dif.pdf')
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar_f1, mdar_f1, deltaxi/xiar_f1, levels=levs ,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal',ticks=[0.1,0.2,0.3,0.4,0.5,0.6,0.7])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar_f1, mdar_f1*2.*1.e38*0.1, deltaxi/xiar_f1, levels=levs,cmap='jet') #,levels=rlev)
+    title(r'$\Delta \xi/\xi$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax.set_ylim(3.e3,1.e5)
+ #   ax.set_ylim(1.e3,1.e5)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    ax2.set_ylim(3.e3*2.*1.e38*0.1,1.e5*2.*1.e38*0.1)
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_deltaxi.eps')
     plt.close()
 
+#
+ 
 # plots an S-curve for mu=const, given RMMfile
 def scurve(rmmfile, themu):
 
@@ -622,8 +622,8 @@ def everything(rmmfile):
     
     for ku in arange(nuu):
         for kd in arange(ndd):
-            b.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=-10.,neweta=0.,newalpha=0.1)
-            d.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=-10.,neweta=0.,newalpha=0.1)
+            b.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=1.137,neweta=0.,newalpha=0.1)
+            d.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=1.137,neweta=0.,newalpha=0.1)
             mu_e=muar[ku,kd]
             mdot_e=mdar[ku,kd]
             xi_e=xiar[ku,kd]
@@ -636,11 +636,11 @@ def everything(rmmfile):
     fout.close()
 
 
-def rmmplot_all(fname):
 
-    mu2,md2,xi,qeq,oint,hint,htormax,mdotin,wint,madvterm=rk.rmmread_all(fname)
-    print mu2
-    nkj=raw_input()
+def old_prep(rmmfile):
+    
+    mu2,md2,xi,qeq,oint,hint,htormax,mdotin,wint=rk.rmmread_all(rmmfile)
+
     wuu=unique(mu2)
     wdd=unique(md2)
     nuu=size(wuu)
@@ -652,116 +652,433 @@ def rmmplot_all(fname):
     muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
     xiar=reshape(asarray(xi,dtype=double),[nuu,ndd])
-    qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
-
+    ointar=reshape(asarray(oint,dtype=double),[nuu,ndd])
     htormaxar=reshape(asarray(htormax,dtype=double),[nuu,ndd])
-    mdotinar=reshape(asarray(mdotin,dtype=double),[nuu,ndd])
 
-    madvtermar=reshape(asarray(madvterm,dtype=double),[nuu,ndd])
+    fname='old_prep'
+    fout=open(fname+'.txt', 'w')
 
-    levs=asarray([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+    for ku in arange(nuu):
+        for kd in arange(ndd):
+            mu_e=muar[ku,kd]
+            mdot_e=mdar[ku,kd]
+            xi_e=xiar[ku,kd]
+            o_e=ointar[ku,kd]
+            h_e=htormaxar[ku,kd]
+            fout.write(str(mu_e)+' '+str(mdot_e)+' '+str(xi_e)+' '+str(o_e)+' '+str(h_e)+' '+str(h_e)+ '\n')
+            
+    fout.close()
+
+
+def rmmplot_all(fname):
+
+    mu2,md2,xi,qeq,oint,hint,htormax,mdotin,wint,madvterm=rk.rmmread_all(fname)
+    wuu=unique(mu2)
+    wdd=unique(md2)
+    nuu=size(wuu)
+    ndd=size(wdd)
+    print qeq.min()
+    print qeq.max()
+    print htormax.min()
+    print htormax.max()
+    print mdotin.min()
+    print mdotin.max()
+    print madvterm.min()
+    print madvterm.max()
+ #   lj=raw_input()
+    
+    print nuu
+    print ndd
+
+    muar1=reshape(asarray(mu2,dtype=double),[nuu,ndd])
+    mdar1=reshape(asarray(md2,dtype=double),[nuu,ndd])
+    xiar1=reshape(asarray(xi,dtype=double),[nuu,ndd])
+    qeqar1=reshape(asarray(qeq,dtype=double),[nuu,ndd])
+
+    htormaxar1=reshape(asarray(htormax,dtype=double),[nuu,ndd])
+    mdotinar1=reshape(asarray(mdotin,dtype=double),[nuu,ndd])
+    hintar1=reshape(asarray(hint,dtype=double),[nuu,ndd])
+
+    madvtermar1=reshape(asarray(madvterm,dtype=double),[nuu,ndd])
+    
+    muar=muar1[::1,::50]
+    mdar=mdar1[::1,::50]
+    xiar=xiar1[::1,::50]
+    qeqar=qeqar1[::1,::50]
+    htormaxar=htormaxar1[::1,::50]
+    mdotinar=mdotinar1[::1,::50]
+    hintar=hintar1[::1,::50]
+    madvtermar=madvtermar1[::1,::50]
+
+    
+    
+    levs=np.arange(0.1,1.4,0.01)
+    levs1=np.asarray([0.8,0.85,0.9,0.95,0.99], dtype=double)*100.
+    levsxi=np.asarray([1.25,1.26,1.27], dtype=double)
  #   norm = colors.BoundaryNorm(boundaries=levs, ncolors=256)
 
+    ksiold=2.**(-3./7.)*(1./3.*hintar)**(2./7.)
  
     plt.clf()
     fig=plt.figure()
-    plt.contourf(muar, mdar, xiar,levels=levs,cmap='jet') #,levels=rlev)
-    c=plt.colorbar()
-    plt.contour(muar, mdar, madvtermar, levels=[0.05,0.1,0.2,0.4,0.5,1.,5.], colors='white')
- #   title(r'$\xi$')
-#    c=plt.colorbar()
-    plt.xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-   # tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_xi.pdf')
-
-    plt.clf()
-    fig=plt.figure()
-    plt.contourf(muar, mdar, qeqar,cmap='jet') #,levels=rlev)
-    c=plt.colorbar()
-    plt.contour(muar, mdar, madvtermar, levels=[0.05,0.1,0.2,0.4,0.5,1.,5.], colors='white')
-    #title(r'$qeq$')
- #   c=plt.colorbar()
-    plt.xlabel('$qeq$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-   # tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_qeq.pdf')
-
-
-
-    plt.clf()
-    fig=plt.figure()
-    plt.contourf(muar, mdar, htormaxar,cmap='jet') #,levels=rlev)
-    c=plt.colorbar()
-    plt.contour(muar, mdar, madvtermar, levels=[0.05,0.1,0.2,0.4,0.5,1.,5.], colors='white')
-    #title(r'$qeq$')
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdotinar*mdar, xiar,levels=levs,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal',ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdotinar*mdar*2.*1.e38*0.1, xiar,levels=levs,cmap='jet') #,levels=rlev)
+    CS=ax2.contour(muar, mdotinar*mdar*2.*1.e38*0.1, xiar,levels=levsxi,colors='white')
     
-    plt.xlabel('$qeq$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-   # tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_htormax.pdf')
-
-
-    plt.clf()
-    fig=plt.figure()
-    plt.contourf(muar, mdar, mdotinar,cmap='jet') #,levels=rlev)
-    c=plt.colorbar()
-    plt.contour(muar, mdar, madvtermar, levels=[0.05,0.1,0.2,0.4,0.5,1.,5.], colors='white')
-    #title(r'$qeq$')
- #   c=plt.colorbar()
-    plt.xlabel('$qeq$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-   # tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_mdotin.pdf')
-
-
-    plt.clf()
-    fig=plt.figure()
-    plt.contourf(muar, mdar, madvtermar,cmap='jet') #,levels=rlev)
-    #title(r'$qeq$')
-    c=plt.colorbar()
-    plt.xlabel('$qeq$, $10^{30}$G\,cm$^{3}$',fontsize=18)
-    plt.ylabel('$\dot{m}$',fontsize=18)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim([muar.min(),muar.max()])
-    plt.ylim([mdar.min(),mdar.max()])
-   # tick_params(labelsize=16, length=8, width=1.0, which='major', pad=8)
-#    tick_params(labelsize=16, length=4, width=1.0, which='minor', pad=8)
-#    fig.tight_layout(pad=3.5,w_pad=0., h_pad=0.)
-#    fig.set_size_inches(6, 5)
-    plt.savefig(fname+'_adv.pdf')
-
-
+    title(r'$\xi$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_xi.eps')
     plt.close()
+
+    xiarnew=xiar*mdotinar**(2./7.)
+    difxi=xiar*(1.-mdotinar**(2./7.))
+    
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar*mdotinar, xiarnew,levels=levs,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal',ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*mdotinar*2.*1.e38*0.1, xiarnew,levels=levs,cmap='jet') #,levels=rlev)
+    CS=ax2.contour(muar, mdar*mdotinar*2.*1.e38*0.1, xiarnew,levels=levsxi,colors='white')
+    
+    title(r'$\xi_{\rm eff}$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_xi_modified.eps')
+    plt.close()
+
+
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, difxi,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal',ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, difxi,cmap='jet') #,levels=rle
+    
+    title(r'$\Delta \xi$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_xi_dif.eps')
+    plt.close()
+
+
+
+    levqeq=np.arange(0.8,1.42,0.01)
+
+
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, qeqar, levels=levqeq ,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')#,ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, qeqar,levels=levqeq,cmap='jet') #,levels=rlev)
+    title('$qeq$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_qeq.eps')
+    plt.close()
+
+
+    levhr=np.arange(0.01,1.36,0.01)
+ 
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, htormaxar, levels=levhr , cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')#,ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, htormaxar, levels=levhr, cmap='jet') #,levels=rlev)
+    title(r'$(H/R)_{\rm max}$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_htormax.eps')
+    plt.close()
+
+
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, hintar, cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')#,ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, hintar, cmap='jet') #,levels=rlev)
+    title(r'$(H/R)_{\rm max}$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_htor.eps')
+    plt.close()
+
+    
+
+    levadv=np.arange(3.e-6,1.,0.01)
+
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, madvtermar, levels=levadv ,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')#,ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, madvtermar, levels=levadv,cmap='jet') #,levels=rlev)
+    title(r'$Q_{\rm adv}/Q_{\rm total}$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax.set_ylim(1.e3,1.e5)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 6.25)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_adv.eps')
+    plt.close()
+
+    levmd=np.arange(0.7,0.99,0.005)
+    levmd[-1]=1.1
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, mdotinar, levels=levmd,cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')#,ticks=[0.1,0.3,0.5,0.7,0.9,1.1,1.3])
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, mdotinar, levels=levmd,cmap='jet') #,levels=rlev)
+    CS=ax2.contour(muar, mdar*2.*1.e38*0.1, madvtermar*100.,levels=levs1,colors=('1', '0.75', '0.50','0.25','0'))  
+    title(r'$\dot M_{\rm in}/\dot M_{\rm out}$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax.set_ylim(3.e3,1.e5)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2.set_ylim(3.e3*2.*1.e38*0.1,1.e5*2.*1.e38*0.1)
+    plt.savefig(fname+'_mdotin.eps')
+    plt.close()
+
+    plt.clf()
+    plot(hintar,xiar*mdotinar**(2./7.),color='black')
+    plot(hintar,xiar,color='blue')
+    plot(hintar,1.113*hintar**(2./7.),color='red')
+ #   plt.xscale('log')
+    xlim(0.5,1.4)
+    ylim(0.9,1.3)
+    xlabel(r'$(H/R)_{\rm in}$')
+    ylabel(r'$\xi$')
+    plt.savefig(fname+'_htormax_vs_xiarpdf.eps')
+    plt.close()
+
+
+
+def rmmplot_crazy(fname):
+
+    mu2,md2,xi,qeq=rk.rmmread(fname)
+    wuu=unique(mu2)
+    wdd=unique(md2)
+    nuu=size(wuu)
+    ndd=size(wdd)
+    
+
+    print nuu
+    print ndd
+
+    muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
+    mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
+    xiar=reshape(asarray(xi,dtype=double),[nuu,ndd])
+    qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
+ #   muar2=muar[where(muar>0.9607*mdar**(1./2.))]
+#    mdar2=mdar[where(muar>0.9607*mdar**(1./2.))]
+#    nuu1=size(muar2)
+#    ndd1=size(mdar2)
+#    muarnew=reshape(asarray(muar2,dtype=double),[nuu1,ndd1])
+#    mdarnew=reshape(asarray(mdar2,dtype=double),[nuu1,ndd1])
+
+
+    dotp=6.31e-3*1.137**2.*mdar**(6./7.)*muar**(1./7.)
+ #   dotpnew=1.38e-5*1.137**2.*mdarnew**(6./7.)*muarnew**(1./7.)
+    
+    pconst=pstar*lam**(3./7.)*muar**(6./7.)*xiar**(-0.25)*(1./3.)**(0.5)*mdar**(-3./7.)*2.**(3./7.)
+    
+    
+    psc=muar-0.9607*mdar**(1./2.)
+    levs=np.arange(0.1,1.4,0.01)
+    levs1=np.asarray([0.8,0.85,0.9,0.95,0.99], dtype=double)*100.
+    levsxi=np.asarray([1.25,1.26,1.27], dtype=double)
+ #   norm = colors.BoundaryNorm(boundaries=levs, ncolors=256)
+
+    #ksiold=2.**(-3./7.)*(1./3.*hintar)**(2./7.)
+
+    plt.clf()
+    plot(mdar,dotp)
+    plt.savefig(fname+'_crazy_.eps')
+    plt.close()
+ 
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, dotp, cmap='jet') #,levels=rlev)
+#    cax1hat=ax.contour(muar, mdar, psc,levels=[0.],hatches=[None,'-'],color='none') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+ #   ax2 = ax.twinx()
+#    ax2.contourf(muar, mdar*2.*1.e38*0.1, dotp,cmap='jet') #,levels=rlev)
+ #   CS=ax2.contour(muar, mdar*2.*1.e38*0.1, dotp,colors='white')
+    cax11hat=ax.contour(muar, mdar, psc,levels=[0., 100.],colors='white') #,levels=rlev)
+
+    cax1hat=ax.contourf(muar, mdar, psc,levels=[-190.,0., 100.],colors='none',hatches=[None,'o'],extend='lower') #,levels=rlev)
+    yt=ax.contour(muar, mdar, dotp,levels=[5.],colors='white',linestyles='dashed') #,levels=rlev)
+    yt1=ax.contourf(muar, mdar, dotp,levels=[-100., 5.,100.],colors='none',hatches=['.',None],extend='lower') #,levels=rlev)
+    yt2=ax.contour(muar, mdar, mdar,levels=[7500.],colors='black') #,levels=rlev)
+    yt3=ax.contour(muar, mdar, mdar,levels=[5000.],colors='black') #,levels=rlev)
+  
+    title(r'$\dot p/(10^{-9}$\ s\ s$^{-1}$)',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+ #   ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+ #   ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+ #   ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+ #   ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_crazy.eps')
+    plt.close()
+
+    plt.clf()
+    fig=plt.figure()
+    ax = fig.add_subplot(111)
+    cax1=ax.contourf(muar, mdar, xiar, cmap='jet') #,levels=rlev)
+    p0 = ax.get_position().get_points().flatten()
+    ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
+    cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal')
+    tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    ax2 = ax.twinx()
+    ax2.contourf(muar, mdar*2.*1.e38*0.1, xiar,cmap='jet') #,levels=rlev)
+ #   CS=ax2.contour(muar, mdar*2.*1.e38*0.1, dotp,colors='white')
+    
+    title(r'$\xi$',fontsize=20)
+    ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
+    ax.set_ylabel('$\dot{m}$',fontsize=20)
+    ax2.set_ylabel('$L$, erg\,s$^{-1}$',fontsize=20)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax2.set_yscale('log')
+    fig.set_size_inches(10., 12.5)
+    ax2.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
+    ax2.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
+    plt.savefig(fname+'_xi.eps')
+    plt.close()
+
+
+
+
     
 
     

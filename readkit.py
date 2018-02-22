@@ -8,6 +8,7 @@ from scipy.integrate import *
 from scipy.interpolate import *
 from scipy.optimize import curve_fit
 
+
 from parameters import *
 
 #Uncomment the following if you want to use LaTeX in figures 
@@ -245,6 +246,212 @@ def rmmread(fname):
     return mmu2,mmd2,mxi,mo
 
 
+def rmmtransf(fname):
+
+    fname_low='sample'
+    mu_l,md_l,xi_l,qeq_l,oint_l,hint_l,htormax_l,mdotin_l,wint_l,adv_l=rmmread_all(fname_low)
+    mu_h,md_h,xi_h,qeq_h,oint_h,hint_h,htormax_h,mdotin_h,wint_h,adv_h=rmmread_all(fname)
+
+ #   print mdotin_l
+#    cmlkmsl=raw_input()
+
+    # mu for everybody
+    muu=[]
+    mu0=1.1
+    while(mu0<100):
+        muu.append(mu0)
+        mu0=mu0+0.3
+    mu=asarray(muu, dtype=double)
+ 
+    print 'here1'
+    # \dot m for everybody
+    mdu=[]
+    md0=1.1
+    while(md0<1.e5):
+        mdu.append(md0)
+        md0=md0+10.
+    md=asarray(mdu, dtype=double)
+    print 'here2'
+
+    mdu1=[]
+    i=0
+    md0=1.
+    while(md0<1000):
+        mdu1.append(md0)
+        i+=1
+        md0=md0+10.
+    md_new_l=asarray(mdu1, dtype=double)
+   
+    print 'here3'
+
+    wuu=unique(mu)
+    nuu=size(wuu)
+    wdd=unique(md)
+    ndd=size(wdd)
+    
+    wuu_l=unique(mu_l)
+    nuu_l=size(wuu_l)
+    wdd_l=unique(md_l)
+    ndd_l=size(wdd_l)
+
+    wuu_h=unique(mu_h)
+    nuu_h=size(wuu_h)
+    wdd_h=unique(md_h)
+    ndd_h=size(wdd_h)
+
+
+    levs=asarray([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+   
+
+    newxi_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), xi_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newqeq_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), qeq_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newoint_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), oint_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newhint_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), hint_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newhtormax_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), htormax_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newmdotin_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), mdotin_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newwint_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), wint_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newadv_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), adv_l, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+   
+    newxi_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), xi_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newqeq_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), qeq_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newoint_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), oint_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newhint_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), hint_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newhtormax_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), htormax_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newmdotin_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), mdotin_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newwint_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), wint_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+    newadv_h=scipy.interpolate.interp2d(log10(wuu_h), log10(wdd_h), adv_h, kind='cubic', copy=True, bounds_error=False, fill_value=nan)
+   
+
+
+
+#    print "3162 "+str(newxi_h(1.,3162.))+'\n'
+#    print "4216.96503429 "+str(newxi_h(1.,4216.96503429))+'\n'
+#    print "4300 "+str(newxi_h(1.,4300))+'\n'
+#    print "4600 "+str(newxi_h(1.,4600))+'\n'
+#    print "5623.4132519"+str(newxi_h(1.,5623.4132519))+'\n'
+#    print "7499"+str(newxi_h(1.,7499.))+'\n'
+ #   rr=raw_input('f')
+
+
+
+    fname='rmm_ready'
+    fout=open(fname+'.txt', 'w')
+    ku=0
+    kd=0
+    
+    for ku in arange(nuu):
+        
+        for kd in arange(ndd):
+
+            mu_e=mu[ku]
+            mdot_e=md[kd]
+            if(mdot_e<=1000.):
+                xi_e=newxi_l(log10(mu_e),log10(mdot_e))
+                qeq_e=newqeq_l(log10(mu_e),log10(mdot_e))
+                oint_e=newoint_l(log10(mu_e),log10(mdot_e))
+                hint_e=newhint_l(log10(mu_e),log10(mdot_e))
+                htormax_e=newhtormax_l(log10(mu_e),log10(mdot_e))
+                mdotin_e=newmdotin_l(log10(mu_e),log10(mdot_e))
+                wint_e=newwint_l(log10(mu_e),log10(mdot_e))
+                adv_e=newadv_l(log10(mu_e),log10(mdot_e))
+                
+            else:
+                xi_e=newxi_h(log10(mu_e),log10(mdot_e))
+                qeq_e=newqeq_h(log10(mu_e),log10(mdot_e))
+                oint_e=newoint_h(log10(mu_e),log10(mdot_e))
+                hint_e=newhint_h(log10(mu_e),log10(mdot_e))
+                htormax_e=newhtormax_h(log10(mu_e),log10(mdot_e))
+                mdotin_e=newmdotin_h(log10(mu_e),log10(mdot_e))
+                wint_e=newwint_h(log10(mu_e),log10(mdot_e))
+                adv_e=newadv_h(log10(mu_e),log10(mdot_e))
+
+            fout.write(str(mu_e)+' '+str(mdot_e)+' '+str(xi_e[0])+' '+str(qeq_e[0])+ ' '+ str(oint_e[0])+' '+str(hint_e[0])+' '+str(htormax_e[0])+' '+str(mdotin_e[0])+ ' ' +str(wint_e[0]) +' '+str(adv_e[0])+'\n')
+        
+    fout.close()
+
+    
+    
+
+def rmmcrazy(fname):
+
+    mu_l,md_l,xi_l,qeq_l=rmmread(fname)
+    xi_l=xi_l.ravel()
+    xi_l=xi_l[xi_l>1.e-5]
+    print xi_l
+
+    
+ 
+    muu=[]
+    mu0=1.1
+    while(mu0<100.):
+        muu.append(mu0)
+        mu0=mu0+0.3
+    mu=asarray(muu, dtype=double)
+ 
+    print 'here1'
+    # \dot m for everybody
+    mdu=[]
+    md0=500.
+    while(md0<1.e4):
+        mdu.append(md0)
+        md0=md0+10.
+    md=asarray(mdu, dtype=double)
+    print 'here2'
+
+    
+    print 'here3'
+
+    wuu=unique(mu)
+    nuu=size(wuu)
+    wdd=unique(md)
+    ndd=size(wdd)
+    
+    wuu_l=unique(mu_l)
+    nuu_l=size(wuu_l)
+    wdd_l=unique(md_l)
+    ndd_l=size(wdd_l)
+
+    f = SmoothBivariateSpline(log10(wuu_l),log10(wdd_l),xi_l,kx=1,ky=1)
+
+    print f(log10(505.),log10(10.))
+
+    nhu=raw_input()
+
+
+    levs=asarray([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
+   
+
+ #   newxi_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), xi_l, kind='linear', copy=True, bounds_error=False, fill_value=nan)
+    newqeq_l=scipy.interpolate.interp2d(log10(wuu_l), log10(wdd_l), qeq_l, kind='linear', copy=True, bounds_error=False, fill_value=nan)
+ 
+    
+
+
+    fname='rmm_ready_crazy'
+    fout=open(fname+'.txt', 'w')
+    ku=0
+    kd=0
+    
+    for ku in arange(nuu):
+        
+        for kd in arange(ndd):
+
+            mu_e=mu[ku]
+            mdot_e=md[kd]
+           
+            xi_e=newxi_l(log10(mu_e),log10(mdot_e))
+            qeq_e=newqeq_l(log10(mu_e),log10(mdot_e))
+ 
+    
+
+            fout.write(str(mu_e)+' '+str(mdot_e)+' '+str(xi_e[0])+' '+str(qeq_e[0])+'\n')
+        
+    fout.close()
+
+  
+
+
+
 def per():
 
     fname1='rastr.txt'
@@ -453,6 +660,7 @@ def rmmread_all(fname):
     htormax=[]
     mdotin=[]
     wint=[]
+    adv=[]
 
     while(s):
         if(size(s)>=4):
@@ -465,6 +673,7 @@ def rmmread_all(fname):
             htormax.append(s[6])
             mdotin.append(s[7])
             wint.append(s[8])
+            adv.append(s[9])
     
         s=str.split(str.strip(fin.readline()))
     fin.close()
@@ -479,11 +688,23 @@ def rmmread_all(fname):
     mhtormax=asarray(htormax, dtype=double)
     mmdotin=asarray(mdotin, dtype=double)
     mwint=asarray(wint, dtype=double)
+    madvterm=asarray(adv, dtype=double)
+
+    
+    wmdotin1=where(mmdotin>1.)
+    if(size(wmdotin1)>0):
+        mmdotin[wmdotin1]=1.
+    
 
     mrin=(lam*mmu2**2/mmd2)**(2./7.)*2.**(-1./7.)*mxi
 
     madvterm=3.*mmdotin*mhint/(5.*mrin**2.)
+    madvterm=madvterm/(1.+madvterm)
 
-    return mmu2,mmd2,mxi,mqeq,moint,mhint,mhtormax,mmdotin/mmd2,mwint,madvterm
+    return mmu2,mmd2,mxi,mqeq,moint,mhint/mrin,mhtormax,mmdotin,mwint,madvterm
+
+
+#    print np.arange(1, 10)
+ #   print newxi_h(1., np.arange(k0, k1, n:101))
 
 
