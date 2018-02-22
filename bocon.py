@@ -24,7 +24,7 @@ import os
 from physics import G
 from parameters import *
 
-bound=0 #1 - local pressure balance, 0 - equatorial pressure balance
+bound=1 #1 - local pressure balance, 0 - equatorial pressure balance
 
 def parset(**kwargs):
 #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
