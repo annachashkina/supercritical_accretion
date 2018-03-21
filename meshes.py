@@ -21,8 +21,8 @@ def varpsi():
     newmu=1. ; newmdot=10. ; newps=-10.
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
     d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.0,newalpha=0.1)
-    d.XQset(0.49, 5.6)
-    psi1=1.42 ; psidiff=0.05 ; psi2=30.
+    d.XQset(0.55, 5.)
+    psi1=1.45 ; psidiff=0.04 ; psi2=50.
     d.psiset(psi1)
 
     fout=open('psivar.dat', 'w+')
@@ -90,51 +90,67 @@ def xiqeqplane():
     
 # varying rout test:
 def varrout():
-    newmu=1. ; newmdot=10.
-    d.XQset(0.5, 0.99)
-
-    rmin=2. ; rmax=2000. ; nrads=5
+    newmu=1. ; newmdot=1e5
+    d.XQset(1.34, 2.69)
+    xi0=1.34 ; qeq0=2.69
+    
+    rmin=1e3 ; rmax=1.e4 ; nrads=10
     rr=(rmax/rmin)**(np.arange(nrads)/double(nrads-1))*rmin
     xiar=np.zeros(nrads, dtype=double)
     qeqar=np.zeros(nrads, dtype=double)
+    qeqarest=(sqrt(rr)-sqrt(rr[0]))/2.+qeq0
+    print qeqarest
+    r=raw_input("ew")
     fout=open('varrout.txt', 'w')
     for k in np.arange(nrads):
+        d.XQset(xi0, qeqarest[k])
         thp=d.ordiv_smart(newmu, newmdot, -10., routscale=rr[k])
         xiar[k]=thp[0] ; qeqar[k]=thp[1]
         if(thp[2]):
-            d.XQset(xiar[k], qeqar[k])
+            #            d.XQset(xiar[k], qeqar[k])
             print "xi = "+str(xiar[k])
             fout.write(str(rr[k])+' '+str(xiar[k])+' '+str(qeqar[k])+'\n')
             fout.flush()
     fout.close()
     clf()
+    subplot(121)
     plot(rr, xiar, '.k')
     xscale('log')
-    xlabel(r'$R_{\rm in}/R_{\rm out}$')
+#    xlabel(r'$R_{\rm in}/R_{\rm out}$')
     ylabel(r'$\xi$')
+    subplot(121)
+    plot(rr, qeqar, '.k')
+    xscale('log')
+    xlabel(r'$R_{\rm in}/R_{\rm out}$')
+    ylabel(r'$qeq$')
     savefig('xrouttest.eps')
     
 # varying ps
 def varps(newmu, newmdot):
     tstart=time.time()
-    d.XQset(0.5, 0.99)
-    ps1=b.peq()*10. ; psfac=0.9 ; newps=ps1
+    d.XQset(1.0, 0.9)
+    ps1=b.peq()*10. ; psfac=0.95 ; newps=ps1
     converged=True
 
     psar=[] ; xar=[] ; qeqar=[]
     f=open('varps.txt','w')
     
     while(converged):
+        rscale=newmdot
+        if(newmdot<100.):
+            rscale=100.
         b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
-        x0, x1, converged=d.ordiv_smart(newmu, newmdot, newps)
+        x0, x1, converged=d.ordiv_smart(newmu, newmdot, newps, routscale=rscale)
         d.XQset(x0, x1)
         print "varps: P = "+str(newps)+": "+str(x0)+", "+str(x1)
-        print str(xiest)+", "+str(qeqest)
+        print "(Peq = "+str(b.peq())+")"
+        #        print str(xiest)+", "+str(qeqest)
       
         if(converged):
             psar.append(newps) ; xar.append(x0) ; qeqar.append(x1) 
-        f.write(str(newps)+' '+str(xiest)+' '+str(qeqest)+'\n')
+            f.write(str(newps)+' '+str(x0)+' '+str(x1)+'\n')
+            f.flush()
         newps*=psfac
         
     f.close()
@@ -145,10 +161,10 @@ def varmdot(newmu,newps):
 
     tstart=time.time()
 
-    d.XQset(0.4, 0.99)
-    newmdot1=10.
+    d.XQset(1.05, 0.965)
+    newmdot1=1000.
     newmdot2=10000.
-    nmdot=16
+    nmdot=25
     mdar=(newmdot2/newmdot1)**(arange(nmdot)/double(nmdot-1))*newmdot1
    
     xx=xiest
@@ -160,9 +176,9 @@ def varmdot(newmu,newps):
         d.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
         x0, x1, converged=d.ordiv_smart(newmu, newmdot, newps)
         d.XQset(x0, x1)
-        f.write(str(newmu)+' '+str(newmdot)+' '+str(xiest)+' '+str(qeqest)+'\n')
-        print str(newmu)+' '+str(newmdot)+' '+str(xiest)+' '+str(qeqest)+'\n'
-        
+        f.write(str(newmu)+' '+str(newmdot)+' '+str(x0)+' '+str(x1)+'\n')
+        print str(newmu)+' '+str(newmdot)+' '+str(x0)+' '+str(x1)+'\n'
+        f.flush()
     f.close()
     tend=time.time()
     
@@ -223,11 +239,14 @@ def rmmclone(inspirefile, newps, neweta):
     muar, mdar, xi0ar, qeq0ar = rk.rmmread(inspirefile)
     nn=np.size(muar)
 #    xiar=np.zeros(nn, dtype=double) ;   qeqar=np.zeros(nn, dtype=double)
-    fout=open(inspirefile+'_eta'+str(neweta)+'.txt', 'w')
+    fout=open(inspirefile+'_ps'+str(newps)+'_eta'+str(neweta)+'.txt', 'w')
     for kk in np.arange(nn):
         d.XQset(xi0ar[kk], qeq0ar[kk])
         print "xi estimate = "+str(xi0ar[kk])
-        xiar,qeqar,conv =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta)
+        rscale=mdar[kk] # outer radius is the maximum of mdot and 100
+        if(rscale<100.):
+            rscale=100.
+        xiar,qeqar,conv =d.ordiv_smart(muar[kk], mdar[kk], -newps, neweta=neweta, routscale=rscale)
         fout.write(str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n ')
         print str(muar[kk])+' '+str(mdar[kk])+' '+str(xiar)+' '+str(qeqar)+'\n '
         print "Delta xi = "+str(xiar-xi0ar[kk])
@@ -239,13 +258,13 @@ def rmmclone(inspirefile, newps, neweta):
 # two-dimensional mesh for fixed Ps (or Ps/Peq, if newps<0) and eta
 def rmm(newps, neweta):
 
-    d.XQset(0.4, 0.9)
+    d.XQset(1., 1.1)
 
     tstart=time.time()
 
     mumin=1. ;   mumax=100.
-    mdmin=10. ;    mdmax=10000.
-    nmu=17 ;    nd=16
+    mdmin=1.e4 ;    mdmax=1.e5
+    nmu=17 ;    nd=5
 
     muar=(mumax/mumin)**(arange(nmu)/double(nmu-1))*mumin
     mdar=(mdmax/mdmin)**(arange(nd)/double(nd-1))*mdmin
@@ -271,7 +290,10 @@ def rmm(newps, neweta):
         for kd in arange(nd):
             mu2[ku,kd]=muar[ku]
             md2[ku,kd]=mdar[kd]
-            xi[ku,kd],qeq[ku,kd],conv[ku,kd] =d.ordiv_smart(muar[ku], mdar[kd], -newps, neweta=neweta)
+            rscale=mdar[kd] # outer radius is the maximum of mdot and 100
+            if(rscale<100.):
+                rscale=100.
+            xi[ku,kd],qeq[ku,kd],conv[ku,kd] =d.ordiv_smart(muar[ku], mdar[kd], -newps, neweta=neweta,  routscale=rscale)
             if(conv[ku,kd]):
                 d.XQset(xi[ku,kd], qeq[ku,kd]) # 
             if(not(conv[ku,kd])):

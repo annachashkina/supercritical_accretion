@@ -258,7 +258,7 @@ def ordiv_smart(newmu, newmdot, newps, routscale=routfactor, neweta=0.):
     print "ordiv_smart mu = "+str(mu)
     print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)
     tstart=time.time()
-    co=scipy.optimize.root(vrapper,(xiest,qeqest),method='hybr',jac=None,tol=1e-4,callback=None,options=None)
+    co=scipy.optimize.root(vrapper,(xiest,qeqest),method='hybr',jac=None,callback=None,options={'xtol':0.0005})
     tend=time.time()
     print "co.x[0]= "+str(co.x[0])+' \n'
     print "co.x[1]= "+str(co.x[1])+' \n'

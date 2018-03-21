@@ -597,8 +597,7 @@ def scurve(rmmfile, themu):
     yscale('log')
     savefig('scurvein.eps')
 
-
-
+# post-processing of a pre-calculated grid
 def everything(rmmfile):
     
     mu2,md2,xi,qeq=rk.rmmread(rmmfile)
@@ -617,13 +616,13 @@ def everything(rmmfile):
     qeqar=reshape(asarray(qeq,dtype=double),[nuu,ndd])
     
 
-    fname='rmm_all'
-    fout=open(fname+'.txt', 'w')
+    fname=rmmfile+'fignya.txt'
+    fout=open(fname, 'w')
     
     for ku in arange(nuu):
         for kd in arange(ndd):
-            b.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=1.137,neweta=0.,newalpha=0.1)
-            d.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=1.137,neweta=0.,newalpha=0.1)
+            b.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=-10.,neweta=0.,newalpha=0.1)
+            d.parset(newmu=muar[ku,kd], newmdot=mdar[ku,kd],newps=-10.,neweta=0.,newalpha=0.1)
             mu_e=muar[ku,kd]
             mdot_e=mdar[ku,kd]
             xi_e=xiar[ku,kd]
@@ -632,7 +631,7 @@ def everything(rmmfile):
             print mu
             oint, hint, tint, htormax, mdotin, wint = d.rastr(xiar[ku,kd], qeqar[ku,kd])
             fout.write(str(mu_e)+' '+str(mdot_e)+' '+str(xi_e)+' '+str(qeq_e)+' '+str(oint)+' '+str(hint)+' '+str(htormax)+' '+str(mdotin)+' '+str(wint)+ '\n')
-
+            fout.flush()
     fout.close()
 
 
