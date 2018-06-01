@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 import matplotlib
 from matplotlib import rc
 from matplotlib import axes
@@ -24,10 +26,10 @@ n=1. #vertical structure parameter, \rho \propto (1-(z/H)^2)^n
 mmean=0.6 #mmean=m_particle/m_proton (mmean=0.6 for completely ionized Solar-metallicity matter)
 #dimensionless coefficients
 lam=3.9848e10
-chi=8.8e-6/mmean
+chi=old_div(8.8e-6,mmean)
 pstar=4.33e-5
 #vertical structure
-tvert=219./1024. #vertical structure n=1
+tvert=old_div(219.,1024.) #vertical structure n=1
 hvert=sqrt(5.)  #vertical structure n=1
 #program coefficients
 tol=1e-6
@@ -38,3 +40,4 @@ qeqest=0.905 # initial estimate for qeq
 xiest=1. # initial estimate for xi
 defac=0.9 # grid non-linearity parameter
 routfactor=100. # outer, starting, radius in inner radius units
+htorcr=1000.0

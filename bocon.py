@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import matplotlib
 from matplotlib import rc
 from matplotlib import axes
@@ -39,27 +43,27 @@ def parset(**kwargs):
     if(ps<0.):
         ps=-ps*peq()
 
-    print "bocon parset:"
-    print "  now mu = "+str(mu)
-    print "  now mdot = "+str(mdotglobal)
-    print "  now eta = "+str(eta)
-    print "  now P = "+str(ps)+"s"
-    print "  now alpha = "+str(alpha)
+    print("bocon parset:")
+    print("  now mu = "+str(mu))
+    print("  now mdot = "+str(mdotglobal))
+    print("  now eta = "+str(eta))
+    print("  now P = "+str(ps)+"s")
+    print("  now alpha = "+str(alpha))
    
 def peq():
-    return pstar*(lam*mu**2/mdotglobal)**(3./7.)*2.**(-3./14.)
+    return pstar*(lam*mu**2/mdotglobal)**(old_div(3.,7.))*2.**(old_div(-3.,14.))
    
 def rafun():
-    return (lam*mu**2/mdotglobal)**(2./7.)*2.**(-1./7.)
+    return (lam*mu**2/mdotglobal)**(old_div(2.,7.))*2.**(old_div(-1.,7.))
    
 def oin(rin, hin,mdotin):
-    beta=hin/rin
+    beta=old_div(hin,rin)
 #    print "bocon.oin: mu = "+str(mu)
 #    print "beta= "+str(beta)+'\n'
 #    print "rin= "+str(rin)+'\n'
     if((beta*eta)>=0.9):
-        beta=0.9/eta
-    return rin**1.5/(1.-eta*beta)*(pstar/ps+2.*kt*lam*mu**2.*hin/rin**6./mdotin)
+        beta=old_div(0.9,eta)
+    return rin**1.5/(1.-eta*beta)*(old_div(pstar,ps)+2.*kt*lam*mu**2.*hin/rin**6./mdotin)
 
 def fhin(rin, tau,mdotin):
 # aprobado: formula especial para espesor vertical del disco interior
@@ -76,15 +80,15 @@ def quartic(c1,c2):
     # solves x^4+c2x+c1=0 for c1<0, c2>0, when there is !1 solution
     p=-4./3.*c1
     q=-c2**2
-    ap=(sqrt(q**2+4.*p**3)-q)/2.
-    am=-(sqrt(q**2+4.*p**3)+q)/2.
-    t=ap**(1./3.)+sign(am)*(abs(am))**(1./3.)
+    ap=old_div((sqrt(q**2+4.*p**3)-q),2.)
+    am=old_div(-(sqrt(q**2+4.*p**3)+q),2.)
+    t=ap**(old_div(1.,3.))+sign(am)*(abs(am))**(old_div(1.,3.))
 
     if(t<=toff):
         return sqrt(sqrt(-c1))
     x=sqrt(t)*(sqrt(2.*c2/t**1.5-1.)-1.)/2.
     if(x<=toff):
-        return -c1/c2
+        return old_div(-c1,c2)
     else:
         return x
 
@@ -130,7 +134,7 @@ def tausolve(rrin,mdotin):
         f1=ABCfun(wrf1, rin, hin1, tau1, omega1,mdotin)
         if((f1*f2)>=0.):
             return sqrt(-1.),sqrt(-1.),sqrt(-1.),sqrt(-1.)
-    while(abs((tau1-tau2)/(tau1+tau2))>tol):
+    while(abs(old_div((tau1-tau2),(tau1+tau2)))>tol):
         tau=sqrt(tau1*tau2)
         hin=fhin(rin,tau,mdotin)
         omega=oin(rin,hin,mdotin)
@@ -160,7 +164,7 @@ def taumin(rrin,mdotin):
     f1=ABCfun(wrf1, rin, hin1, tau1, omega1,mdotin)
     f2=ABCfun(wrf2, rin, hin2, tau2, omega2,mdotin)
 
-    while(abs((tau1-tau2)/(tau1+tau2))>tol):
+    while(abs(old_div((tau1-tau2),(tau1+tau2)))>tol):
         tau=sqrt(tau1*tau2)
         hin=fhin(rin,tau,mdotin)
         omega=oin(rin,hin,mdotin)

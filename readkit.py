@@ -1,4 +1,9 @@
+from __future__ import print_function
+from __future__ import division
 #READS DIFFERENT FILES
+from builtins import input
+from builtins import str
+from past.utils import old_div
 import matplotlib
 from matplotlib import rc
 from matplotlib import axes
@@ -102,8 +107,8 @@ def readrastr(filename):
     qplus=asarray(q3,dtype=double)
     ha=asarray(ha,dtype=double)
     hb=asarray(hb,dtype=double)
-    htora=ha/r
-    htorb=hb/r
+    htora=old_div(ha,r)
+    htorb=old_div(hb,r)
     
 
     ff.close()
@@ -167,8 +172,8 @@ def rastr():
 #    yscale('log')
 
     plt.subplot (3, 3, 5)
-    plot(r*206746.*rin, tc*9.6e7/(r*206746.)**(3./4.), color='red',label='calc-new')
-    plot(r_old*206746.*rin, tc_old*9.6e7/(r_old*206746.)**(3./4.), color='green',label='calc-old')
+    plot(r*206746.*rin, tc*9.6e7/(r*206746.)**(old_div(3.,4.)), color='red',label='calc-new')
+    plot(r_old*206746.*rin, tc_old*9.6e7/(r_old*206746.)**(old_div(3.,4.)), color='green',label='calc-old')
     ylabel(r'$T_{\rm c}R^{-3/4}$')
     xlabel('$r$')
     xscale('log')
@@ -177,8 +182,8 @@ def rastr():
   
 
     plt.subplot (3, 3, 6)
-    plot(r*206746.*rin, fabs(qadv/qplus), color='red',label='Qadv-Qvis')
-    plot(r*206746.*rin, fabs(qrad/qplus), color='green',label='Qrad-Qvis')
+    plot(r*206746.*rin, fabs(old_div(qadv,qplus)), color='red',label='Qadv-Qvis')
+    plot(r*206746.*rin, fabs(old_div(qrad,qplus)), color='green',label='Qrad-Qvis')
     ylim(0.0001,1.01)
     ylabel('$Q$')
     xlabel('$r$')
@@ -236,8 +241,8 @@ def rmmread(fname):
             o.append(s[3])
         s=str.split(str.strip(fin.readline()))
     fin.close()
-    print np.size(mu2)
-    print np.size(md2)
+    print(np.size(mu2))
+    print(np.size(md2))
     mmu2=asarray(mu2, dtype=double)
     mmd2=asarray(md2, dtype=double)
     mxi=asarray(xi, dtype=double)
@@ -263,7 +268,7 @@ def rmmtransf(fname):
         mu0=mu0+0.3
     mu=asarray(muu, dtype=double)
  
-    print 'here1'
+    print('here1')
     # \dot m for everybody
     mdu=[]
     md0=1.1
@@ -271,7 +276,7 @@ def rmmtransf(fname):
         mdu.append(md0)
         md0=md0+10.
     md=asarray(mdu, dtype=double)
-    print 'here2'
+    print('here2')
 
     mdu1=[]
     i=0
@@ -282,7 +287,7 @@ def rmmtransf(fname):
         md0=md0+10.
     md_new_l=asarray(mdu1, dtype=double)
    
-    print 'here3'
+    print('here3')
 
     wuu=unique(mu)
     nuu=size(wuu)
@@ -377,7 +382,7 @@ def rmmcrazy(fname):
     mu_l,md_l,xi_l,qeq_l=rmmread(fname)
     xi_l=xi_l.ravel()
     xi_l=xi_l[xi_l>1.e-5]
-    print xi_l
+    print(xi_l)
 
     
  
@@ -388,7 +393,7 @@ def rmmcrazy(fname):
         mu0=mu0+0.3
     mu=asarray(muu, dtype=double)
  
-    print 'here1'
+    print('here1')
     # \dot m for everybody
     mdu=[]
     md0=500.
@@ -396,10 +401,10 @@ def rmmcrazy(fname):
         mdu.append(md0)
         md0=md0+10.
     md=asarray(mdu, dtype=double)
-    print 'here2'
+    print('here2')
 
     
-    print 'here3'
+    print('here3')
 
     wuu=unique(mu)
     nuu=size(wuu)
@@ -413,9 +418,9 @@ def rmmcrazy(fname):
 
     f = SmoothBivariateSpline(log10(wuu_l),log10(wdd_l),xi_l,kx=1,ky=1)
 
-    print f(log10(505.),log10(10.))
+    print(f(log10(505.),log10(10.)))
 
-    nhu=raw_input()
+    nhu=input()
 
 
     levs=asarray([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4])
@@ -625,8 +630,8 @@ def sigma_curve():
     sigma50075=asarray(sigma175,dtype=double)
     sigma100075=asarray(sigma275,dtype=double)
 
-    print sigma100075
-    jij=raw_input()
+    print(sigma100075)
+    jij=input()
 
 
  
@@ -696,12 +701,12 @@ def rmmread_all(fname):
         mmdotin[wmdotin1]=1.
     
 
-    mrin=(lam*mmu2**2/mmd2)**(2./7.)*2.**(-1./7.)*mxi
+    mrin=(lam*mmu2**2/mmd2)**(old_div(2.,7.))*2.**(old_div(-1.,7.))*mxi
 
     madvterm=3.*mmdotin*mhint/(5.*mrin**2.)
-    madvterm=madvterm/(1.+madvterm)
+    madvterm=old_div(madvterm,(1.+madvterm))
 
-    return mmu2,mmd2,mxi,mqeq,moint,mhint/mrin,mhtormax,mmdotin,mwint,madvterm
+    return mmu2,mmd2,mxi,mqeq,moint,old_div(mhint,mrin),mhtormax,mmdotin,mwint,madvterm
 
 
 #    print np.arange(1, 10)

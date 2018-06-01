@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy.random
@@ -48,8 +52,8 @@ def rmesh_qeq(newmu, newmdot, newps):
     for k in arange(nr):
         xi, tc=d.ordiv(newmu, newmdot, newps,0.0,qeq[k])
  #      tc=ordiv_tc(newmu, newmdot, newps,0.,qeq,xi)
-        print "xi= "+str(xi)+'\n'
-        print "qeq= "+str(qeq[k])+'\n'
+        print("xi= "+str(xi)+'\n')
+        print("qeq= "+str(qeq[k])+'\n')
         rin=xi*b.rafun()
         oo,hh,tt,hrmax,mdotin,ww=d.rastr(xi,qeq[k],tc)
         oin=b.oin(rin, hh,mdotin)
@@ -143,14 +147,14 @@ def rmesh(newmu, newmdot, newps):
     i=0
     
     for k in arange(nr):
-        xi=xi+(ximax-ximin)/pr
+        xi=xi+old_div((ximax-ximin),pr)
         tc=tcmin
         for w in arange(nr):
-            tc=tc+(tcmax-tcmin)/pr
+            tc=tc+old_div((tcmax-tcmin),pr)
             qeq=qeqmin
             for q in arange(nr):
-                qeq=qeq+(qeqmax-qeqmin)/pr
-                print 'qeq= '+str(qeq)+' tc= '+str(tc)+' xi= '+str(xi)+'\n'
+                qeq=qeq+old_div((qeqmax-qeqmin),pr)
+                print('qeq= '+str(qeq)+' tc= '+str(tc)+' xi= '+str(xi)+'\n')
                 rin=xi*b.rafun()
                 oo,hh,tt,hrmax,mdotin,ww=d.rastr(xi,qeq,tc)
                 oin=b.oin(rin, hh,mdotin)
@@ -166,7 +170,7 @@ def rmesh(newmu, newmdot, newps):
                 st[k,w,q]=ww-wrfin
                 sh[k,w,q]=-hin+hh
                 smdot[k,w,q]=mdotin
-                print i
+                print(i)
                 i+=1        
                 f.write(str(qeq)+' '+str(xi)+' '+str(tc)+' '+str(oo)+' '+str(oin)+' '+str(hh)+' '+str(hin)+' '+str(ww)+' '+str(wrfin)+' '+str(mdotin)+' '+str(oo-oin)+' ' +str(ww-wrfin)+' ' +str(hh-hin)+'\n')
            

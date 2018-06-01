@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import matplotlib
 from matplotlib import rc
 from matplotlib import axes
@@ -40,21 +44,26 @@ from physics import xiinf, raffugen, peqgen
 # visualization functions:
 # from plots import
 
+def htorcrset(newhtorcr):
+    global htorcr
+    htorcr=newhtorcr
+    print("new H/R wind limit = "+str(htorcr))
+
 def XQset(newxi, newqeq):
     global xiest, qeqest
-    print "XQ set"
+    print("XQ set")
     xiest=newxi
     qeqest=newqeq
 
 def psiset(newpsi):
     global psi
     psi=newpsi
-    print "now psi = "+str(psi)
+    print("now psi = "+str(psi))
     
 def routset(newrautfactor):
     global routfactor
     routfactor = newrautfactor
-    print "rout = "+str(routfactor)+" * rin"
+    print("rout = "+str(routfactor)+" * rin")
 
 def parset(**kwargs):
 #(newmu=newmu, neweta=neweta, newp=newp, newmdot=newmdot, newalpha=newalpha):
@@ -69,12 +78,12 @@ def parset(**kwargs):
     if(ps<0.):
         ps=-ps*b.peq()
 
-    print "dirin parset:"
-    print "  now mu = "+str(mu)
-    print "  now mdot = "+str(mdotglobal)
-    print "  now eta = "+str(eta)
-    print "  now P = "+str(ps)+"s"
-    print "  now alpha = "+str(alpha)
+    print("dirin parset:")
+    print("  now mu = "+str(mu))
+    print("  now mdot = "+str(mdotglobal))
+    print("  now eta = "+str(eta))
+    print("  now P = "+str(ps)+"s")
+    print("  now alpha = "+str(alpha))
 
 # dOmega/dr = 
 def domega(omega,r,tau,mdot,wrf,tc):
@@ -121,35 +130,37 @@ def rastr(rrin, qeq):
     rin=ra*rrin
     t=1
     rout=routfactor*rin
-    print "rastr: rout = "+str(routfactor)+" rin"
+    print("rastr: rout = "+str(routfactor)+" rin")
+    print("H/R critical = "+str(htorcr))
     ddr=-1.e-4
     mdot=mdotglobal
 
 #    ps=10.*peqgen(mu,mdot)
 
-    print "rastr_mdotglobal= "+str(mdotglobal)+'\n'
-    print "rastr_mu= "+str(mu)+'\n'
+    print("rastr_mdotglobal= "+str(mdotglobal)+'\n')
+    print("rastr_mu= "+str(mu)+'\n')
  
-    
-    if(mdot<1.5):
-        ddr*=(mdot/1.5)
-    ddr/=(1.+0.5*(b.peq()/ps))
+#    if(mdot<1.5):
+#        ddr*=(mdot/1.5)
+    ddr/=(1.+0.5*(old_div(b.peq(),ps)))
 #    defac=0.99
 
     r=rout
     omega=1.
     oprev=omega
     rprev=r
-
+    rsph=0. # spherization radius tracker
+    
     htormax=0.
     wrf=2.*mdot/r**2*omega*(sqrt(r)-qeq*sqrt(rin))
     wprev=wrf
 #    tc=0.00486297109754*tcqeq
-    tau=4./chi**0.8*(pi/9.)**0.2*mdot**0.6/alpha**0.8/rout**0.6*(1.-qeq*(rin/rout)**0.5)**0.6
-    print "n="+str(n)
+    tau=4./chi**0.8*(old_div(pi,9.))**0.2*mdot**0.6/alpha**0.8/rout**0.6*(1.-qeq*(old_div(rin,rout))**0.5)**0.6
+    tau*=1.
+    print("n="+str(n))
     h=hvert*sqrt(r**3*wrf/alpha/tau)
     tc=b.ctemp(h,wrf,tau)
-    print "Tc="+str(tc)
+    print("Tc="+str(tc))
 #    tc=(2.*n+3.)/2./(n+1.)*wrf/chi/alpha/tau
 #    print "Tc="+str(tc)
 #    rr=raw_input("k")
@@ -158,37 +169,38 @@ def rastr(rrin, qeq):
     tauprev=tau
     tprev=tc
 
+    Lumtot=0. ; Lumrad=0. ; Lumadv=0.
+    
     while(r>=rin):
         dr=ddr*(r-rin*defac)
-        r1=r+dr/2.
+        r1=r+old_div(dr,2.)
         h=hvert*sqrt(r**3*wrf/alpha/tau)
         
         if(isnan(tau)):
-            print "tausolve resulted in NaN"
-            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
+            print("tausolve resulted in NaN")
+            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         omega1=omega+domega(omega,r,tau,mdot,wrf,tc)*dr/2.
         wrf1=wrf+dwrf(tau,omega,r)*dr/2.
         tau1=tau+dtau(tau,tc,wrf,r,omega,mdot)*dr/2.
         tc1=tc+dtemp(tau,tc,wrf,r,omega,mdot)*dr/2.
-        beta1=beta(tau1,tc1,wrf1)
+        bet=beta(tau1,tc1,wrf1)
         
  #       if((r*r)>(9.*tau/(4.*64.*pi*tc**4.))):
-        if(r<h):
+        if(h>(r*htorcr)):
             mdot1=mdot+dmdot(r,tc,tau)*dr/2.
+            if(rsph<=0.):
+                rsph=r
         else:
             mdot1=mdot
- 
+            
         if(wrf1<=0.):
-            print "negative stress! wrf = "+str(wrf1)
-            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.)  
-
-     
-#        h1=fh(wrf1,r1,tc1)
+            print("negative stress! wrf = "+str(wrf1))
+            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)  
         h1=hvert*sqrt(r1**3*wrf1/alpha/tau1)
         
         if(isnan(tau1)):
-            print "tausolve resulted in NaN"
-            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
+            print("tausolve resulted in NaN")
+            return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         oprev=omega
         omega=omega+domega(omega1,r1,tau1,mdot1,wrf1,tc1)*dr
         wprev=wrf
@@ -196,25 +208,37 @@ def rastr(rrin, qeq):
         tcprev=tc
         tc=tc+dtemp(tau1,tc1,wrf1,r1,omega1,mdot1)*dr
  #       tau=ftau(wrf,r,tc)
-        tauprev=tau
+        tauprev=tau ;       hprev=h
         tau=tau+dtau(tau1,tc1,wrf1,r1,omega1,mdot1)*dr
+        Stau=Scal(bet) ;   Swrf=Pcal(bet) ;   Stemp=Qcal(bet)
+        part1=Stau/tau1*dtau(tau1,tc1,wrf1,r1,omega1,mdot1)
+        part2=Swrf/wrf1*dwrf(tau1,omega1,r1)
+        part3=Stemp/tc1*dtemp(tau1,tc1,wrf1,r1,omega1,mdot1)
+        part4=3./r*Swrf
+        Qrad=-16./3.*G(n)*(n+1.)*tc1**4.*4.*pi/(tau1)
+        Qadv=2./(G(n+1.))*mdot1*wrf1/(alpha*r1*tau1)*(part1+part2+part3+part4)
+        Lumadv=Lumadv+Qadv*2.*pi*r1*dr
+        Lumrad=Lumrad+Qrad*2.*pi*r1*dr       
+        Qplus=wrf1*r1**(old_div(-1.,2.))*(domega(omega1,r1,tau1,mdot1,wrf1,tc1)-3./2.*omega1/r1)
+        Lumtot=Lumtot+Qplus*2.*pi*r1*dr
 
-        hprev=h
 ##        h=fh(wrf,r,tc)
  #       if((r1*r1)>(9.*tau1/(4.*64.*pi*tc1**4.))):
-        if(r<h1):
+        if(h1>(r1*htorcr)):
             mdot=mdot+dmdot(r1,tc1,tau1)*dr
+            if(rsph<=0.):
+                rsph=r1
         rprev=r
         r+=dr
 
-        if((h/r)>htormax):
-            htormax=h/r
+        if((old_div(h,r))>htormax):
+            htormax=old_div(h,r)
             rmax=r
     mdotin=mdot
     wrfin=wrf
 
     if(isnan(omega)|(r>rin)):
-        return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.) 
+        return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.) , sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.)
     oint=(omega-oprev)*(rin-rprev)/(r-rprev)+oprev
     hint=(h-hprev)*(rin-rprev)/(r-rprev)+hprev
     tint=(tau-tauprev)*(rin-rprev)/(r-rprev)+tauprev
@@ -224,17 +248,19 @@ def rastr(rrin, qeq):
     wrf_in=b.fwrfin(rin, hint,mdotin)
 #    print "rastr: omega = "+str(omega)+"; h = "+str(h)+"; htormax = "+str(htormax)+"; mdotin = "+str(mdot)+"; wrf = "+str(wrf)+"\n"
 #    print "rastr: omega_in = "+str(omega_in)+"; h_in = "+str(hint)+" ; wrf_in = "+str(wrf)+"\n"
-    print str(oint)+' '+str(hint)+' '+str(tint)+' '+str(htormax)+' '+str(mdotin)+' '+str(wint)+'\n'
-    return oint, hint, tint, htormax, mdotin, wint
+    print(str(oint)+' '+str(hint)+' '+str(tint)+' '+str(htormax)+' '+str(mdotin)+' '+str(wint)+'\n')
+    return oint, hint, tint, htormax, mdotin, wint,rsph, Lumadv, Lumrad, Lumtot
+
 # criterion for the boundary conditions -- do we fit them?
 
 def doffwrfin(xi,qeq):
     ra=b.rafun()
     rin=ra*xi
-    oin,hin,tauin,hrmax,mdotin,wrfin=rastr(xi,qeq)
+    rastrout=rastr(xi,qeq)
+    oin,hin,tauin,hrmax,mdotin,wrfin=rastrout[:6]
     omegaBC=b.oin(rin, hin,mdotin)
     wrfBC=b.fwrfin(rin, hin,mdotin)
-    print "oin-omegaBC "+str(oin-omegaBC)+" wrfin-wrfBC "+str(wrfin-wrfBC)+'\n' 
+    print("oin-omegaBC "+str(oin-omegaBC)+" wrfin-wrfBC "+str(wrfin-wrfBC)+'\n') 
     #   tauBC, hBC, omegaBC, wrfBC = b.tausolve(xi, mdotin)
     #    print 'eta = '+str(eta)
     return oin-omegaBC, wrfin-wrfBC
@@ -244,8 +270,8 @@ def vrapper(arg):
     qeq=arg[1]
     a,b=doffwrfin(xi,qeq)
 #    b=doffo(xi,qeq,tc)
-    print "vrap a= "+str(a)+" vrap b= "+str(b)+'\n'
-    print "xi= "+str(xi)+" qeq= "+str(qeq)+'\n'
+    print("vrap a= "+str(a)+" vrap b= "+str(b)+'\n')
+    print("xi= "+str(xi)+" qeq= "+str(qeq)+'\n')
 
     return (a,b)
 # main procedure searching the root
@@ -255,27 +281,27 @@ def ordiv_smart(newmu, newmdot, newps, routscale=routfactor, neweta=0.):
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=neweta,newalpha=0.1)
     routset(routscale)
     #    print 'here'
-    print "ordiv_smart mu = "+str(mu)
-    print "ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest)
+    print("ordiv_smart mu = "+str(mu))
+    print("ordiv_smart: xiest = "+str(xiest)+", qeqest = "+str(qeqest))
     tstart=time.time()
     co=scipy.optimize.root(vrapper,(xiest,qeqest),method='hybr',jac=None,callback=None,options={'xtol':0.0005})
     tend=time.time()
-    print "co.x[0]= "+str(co.x[0])+' \n'
-    print "co.x[1]= "+str(co.x[1])+' \n'
-    print "calculation took "+str(tend-tstart)+"s = "+str((tend-tstart)/60.)+"min"
+    print("co.x[0]= "+str(co.x[0])+' \n')
+    print("co.x[1]= "+str(co.x[1])+' \n')
+    print("calculation took "+str(tend-tstart)+"s = "+str(old_div((tend-tstart),60.))+"min")
     if(not(co.success)):
-        print "ordiv_smart not coverged"
+        print("ordiv_smart not coverged")
     return co.x[0], co.x[1], co.success
 
 def corot(newmu, newmdot, newps,rrin,qeq):
     b.parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
     parset(newmu=newmu, newmdot=newmdot,newps=newps,neweta=0.,newalpha=0.1)
     pstar=4.33e-5
+    rastrout=rastr(rrin, qeq)
+    oint, hint, tint, htormax, mdotin, wint =  rastrout[:6]
+    ral=rrin*(lam*mu**2/mdotin)**(old_div(2.,7.))*2.**(old_div(-1.,7.))
+    rco=(old_div(newps,pstar))**(old_div(2.,3.))
 
-    oint, hint, tint, htormax, mdotin, wint=rastr(rrin, qeq)
-    ral=rrin*(lam*mu**2/mdotin)**(2./7.)*2.**(-1./7.)
-    rco=(newps/pstar)**(2./3.)
-
-    print ral/rco
+    print(old_div(ral,rco))
 
 ###############################

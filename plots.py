@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import input
+from builtins import str
+from past.utils import old_div
 from numpy import *
 import matplotlib.pyplot as plt
 import numpy.random
@@ -13,6 +18,7 @@ from parameters import *
 # functions:
 from physics import G, beta, comegaga, ctau, cwrf, ctemp, fh, ftau
 from physics import Scal, Pcal, Qcal # SPQR
+from physics import raffugen
 # constants
 #from physics import  alpha, eta, kt, epsilon, psi, n, mmean, lam, chi, tvert, hvert
 # more constants:
@@ -45,12 +51,12 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     rout=100.*rin
     ddr=-3.e-5
     mdot=d.mdotglobal ;   mu=d.mu
-    print "rastr1: mdot= "+str(mdot)+" mu= "+str(mu)+" \n"
+    print("rastr1: mdot= "+str(mdot)+" mu= "+str(mu)+" \n")
 #    huh=raw_input()
     
-    if(mdot<1.5):
-        ddr*=(mdot/1.5)
-    ddr/=(1.+0.1*(b.peq()/ps))
+#    if(mdot<1.5):
+#        ddr*=(mdot/1.5)
+    ddr/=(1.+0.1*(old_div(b.peq(),ps)))
     defac=0.99
 
     r=rout
@@ -86,7 +92,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     htormax=0.
 #    mdot=mdotglobal
     wrf=2.*mdot/r**2*omega*(sqrt(r)-qeq*sqrt(rin))
-    tau=4./chi**0.8*(pi/9.)**0.2*mdot**0.6/alpha**0.8/rout**0.6*(1.-qeq*(rin/rout)**0.5)**0.6
+    tau=4./chi**0.8*(old_div(pi,9.))**0.2*mdot**0.6/alpha**0.8/rout**0.6*(1.-qeq*(old_div(rin,rout))**0.5)**0.6
  #   tau=ftau(wrf,r,tc)
     h=hvert*sqrt(r**3*wrf/alpha/tau)
     tc=b.ctemp(h,wrf,tau)
@@ -99,14 +105,14 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
     while(r>=rin):
         dr=ddr*(r-rin*defac)
-        r1=r+dr/2.
+        r1=r+old_div(dr,2.)
 #        print r/rin
 
         h=hvert*sqrt(r**3*wrf/alpha/tau)
 #        print h/r
 
         if(isnan(tau)):
-            print "tausolve resulted in NaN"
+            print("tausolve resulted in NaN")
             return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         omega1=omega+domega(omega,r,tau,mdot,wrf,tc)*dr/2.
         wrf1=wrf+dwrf(tau,omega,r)*dr/2.
@@ -123,13 +129,13 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
             mdot1=mdot
  
         if(wrf1<=0.):
-            print "negative stress! wrf = "+str(wrf1)
+            print("negative stress! wrf = "+str(wrf1))
             return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.),sqrt(-1.), sqrt(-1.)  
 
         h1=hvert*sqrt(r1**3*wrf1/alpha/tau1)
         
         if(isnan(tau1)):
-            print "tausolve resulted in NaN"
+            print("tausolve resulted in NaN")
             return sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.), sqrt(-1.)
         omega=omega+domega(omega1,r1,tau1,mdot1,wrf1,tc1)*dr
         wrf=wrf+dwrf(tau1,omega1,r1)*dr
@@ -137,7 +143,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
         tau=tau+dtau(tau1,tc1,wrf1,r1,omega1,mdot1)*dr
 
-        P4=2./3.
+        P4=old_div(2.,3.)
         P3=1.77526e-5*alpha*tc1*tau1/wrf1
         P1=56329.9*h1*h1/tc1*r1**(-3.)
 
@@ -159,7 +165,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
         Qadv=2./(G(n+1.))*mdot1*wrf1/(alpha*r1*tau1)*(part1+part2+part3+part4)
 
-        Qplus=wrf1*r1**(-1./2.)*(domega(omega1,r1,tau1,mdot1,wrf1,tc1)-3./2.*omega1/r1)
+        Qplus=wrf1*r1**(old_div(-1.,2.))*(domega(omega1,r1,tau1,mdot1,wrf1,tc1)-3./2.*omega1/r1)
 
         r+=dr
         
@@ -167,10 +173,10 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
         if(r<h1):
             mdot=mdot+dmdot(r1,tc1,tau1)*dr
 
-        if((h/r)>htormax):
-            htormax=h/r
+        if((old_div(h,r))>htormax):
+            htormax=old_div(h,r)
             rmax=r
-        if(r<(rlast/(1.+drout))):
+        if(r<(old_div(rlast,(1.+drout)))):
             ttc.append(tc)
             qqra.append(Qrad)
             wwrf.append(wrf)
@@ -178,14 +184,14 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
             qqad.append(Qadv)                                                    
             P1m.append(P1)
             P3m.append(P3)
-            rl.append(r/rin)
+            rl.append(old_div(r,rin))
             ol.append(omega)
             tl.append(tau)
-            hl.append(h/r)
-            dt.append(abs(dtemp(tau1,tc1,wrf1,r1,omega1,mdot1))/tc1)
+            hl.append(old_div(h,r))
+            dt.append(old_div(abs(dtemp(tau1,tc1,wrf1,r1,omega1,mdot1)),tc1))
             do.append(abs(domega(omega1,r1,tau1,mdot1,wrf1,tc1)))
-            dw.append(abs(dwrf(tau1,omega1,r1))/wrf1)
-            dta.append(abs(dtau(tau1,tc1,wrf1,r1,omega1,mdot1))/tau1)
+            dw.append(old_div(abs(dwrf(tau1,omega1,r1)),wrf1))
+            dta.append(old_div(abs(dtau(tau1,tc1,wrf1,r1,omega1,mdot1)),tau1))
             bb.append(beta1)
             rlast=r
             taussa.append(ss.ftaussa(r,mdot, alpha, rin))
@@ -193,7 +199,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
             hssa.append(ss.hssa(mdot,r, rin))
             hssb.append(ss.hssb(r,mdot, alpha, rin))
             mdot123.append(mdot)
-            f.write(str(r/rin)+' '+str(omega)+' '+str(h/r)+' '+str(tau)+' '+str(tc)+' '+str(wrf)+' '+str(ss.ftaussa(r,mdot, alpha, rin))+' '+str(ss.ftaussb(r,mdot, alpha, rin))+' '+str(Qadv)+' '+str(Qrad)+' '+str(Qplus)+' '+str(ss.hssa(mdot,r, rin))+' '+str(ss.hssb(r,mdot, alpha, rin))+' '+str(mdot)+'\n')
+            f.write(str(old_div(r,rin))+' '+str(omega)+' '+str(old_div(h,r))+' '+str(tau)+' '+str(tc)+' '+str(wrf)+' '+str(ss.ftaussa(r,mdot, alpha, rin))+' '+str(ss.ftaussb(r,mdot, alpha, rin))+' '+str(Qadv)+' '+str(Qrad)+' '+str(Qplus)+' '+str(ss.hssa(mdot,r, rin))+' '+str(ss.hssb(r,mdot, alpha, rin))+' '+str(mdot)+'\n')
 
 
     mdotin=mdot
@@ -241,7 +247,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     plt.subplot (3, 3, 1)
     plot(rar*rin*rrin*206746., p1ar, color='black',label='P1')
     plot(rar*rin*rrin*206746., p3ar, color='green',label='P3')
-    plot(rar*rin*rrin*206746., p1ar*0.+2./3., color='red',label='P2')
+    plot(rar*rin*rrin*206746., p1ar*0.+old_div(2.,3.), color='red',label='P2')
     plot(rar*rin*rrin*206746., p3ar*0.+pp, color='blue',label='P4')
     ylim(0.,7.)
     ylabel('$P1,2,3,4$')
@@ -252,8 +258,8 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
 
     plt.subplot (3, 3, 2)
-    plot(rar*rin*rrin*206746., qadv/qplus, color='red',label='Qadv/Qvis')
-    plot(rar*rin*rrin*206746., qrad/qplus, color='green',label='Qrad/Qvis')
+    plot(rar*rin*rrin*206746., old_div(qadv,qplus), color='red',label='Qadv/Qvis')
+    plot(rar*rin*rrin*206746., old_div(qrad,qplus), color='green',label='Qrad/Qvis')
  #   xlim(0.01,5.e10)
     ylabel('flux ratios')
     xlabel('$r$')
@@ -289,7 +295,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     yscale('log')
 
     plt.subplot (3, 3, 6)
-    plot(rar*rin*rrin*206746., mdar/mdotglobal, color='red')
+    plot(rar*rin*rrin*206746., old_div(mdar,mdotglobal), color='red')
     ylabel(r'$\dot M/\dot M_{0}$')
     xlabel('$r$')
     xscale('log')
@@ -313,7 +319,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     
 
     plt.clf()
-    plot(rar, fabs(qadv/qplus), color='blue')
+    plot(rar, fabs(old_div(qadv,qplus)), color='blue')
     ylabel('$Qadv/Qplus$')
     xlabel('$r/rin$')
  #   ylim(0.,10.)   
@@ -322,7 +328,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     savefig('Qadv.eps')
 
     plt.clf()
-    plot(rar, qrad/qplus, color='green')
+    plot(rar, old_div(qrad,qplus), color='green')
     ylabel('$Qrad/Qplus$')
     xlabel('$r/rin$')   
  #   yscale('log')
@@ -331,8 +337,8 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
 
     plt.clf()
-    plot(rar, qrad/qplus, color='green',label='Qrad/Qplus')
-    plot(rar, qadv/qplus, color='red',label='Qadv/Qplus')
+    plot(rar, old_div(qrad,qplus), color='green',label='Qrad/Qplus')
+    plot(rar, old_div(qadv,qplus), color='red',label='Qadv/Qplus')
     ylabel('$Q/Qplus$')
     xlabel('$r/rin$')   
  #   yscale('log')
@@ -379,7 +385,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     plot(rar, taua, color='blue')
     plot(rar, taub, color='green')
     plot(rar, tauar,linestyle='dotted', color='red')
-    plot([rin/rin],[tint], 'o')
+    plot([old_div(rin,rin)],[tint], 'o')
     ylabel(r'$\tau$')
     xlabel('$r/rin$')
     yscale('log')
@@ -388,7 +394,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 
     plt.clf()
     plot(rar, oar, color='k')
-    plot([rin/rin],[oint], 'o')
+    plot([old_div(rin,rin)],[oint], 'o')
     ylabel(r'$\omega$')
     xlabel('$r/rin$')
     xscale('log')
@@ -399,7 +405,7 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
     plot(rar, har,linestyle='dotted', color='red')
     plot(rar, hrssa/rar/rin, color='blue')
     plot(rar, hrssb/rar/rin, color='green')
-    plot([rin/rin],[hint/rin], 'o')
+    plot([old_div(rin,rin)],[old_div(hint,rin)], 'o')
     ylabel('$h/r$')
     xlabel('$r/rin$')
     xscale('log')
@@ -427,25 +433,25 @@ def rastr1(rrin, qeq, newmu=d.mu, newmdot=mdotglobal, newps=ps):
 #    jjoij=raw_input()
 
     
-    print "rastr1: omega = "+str(omega)+"; h = "+str(h)+"; htormax = "+str(htormax)+"; mdotin = "+str(mdot)+"; wrf = "+str(wrf)+"\n"
-    print "rastr1: omega_in = "+str(omega_in)+"; h_in = "+str(h_in)+" ; wrf_in = "+str(wrf)+"\n"
-    print "mdoyin= "+str(mdotin)+' \n'
-    huh=raw_input()
+    print("rastr1: omega = "+str(omega)+"; h = "+str(h)+"; htormax = "+str(htormax)+"; mdotin = "+str(mdot)+"; wrf = "+str(wrf)+"\n")
+    print("rastr1: omega_in = "+str(omega_in)+"; h_in = "+str(h_in)+" ; wrf_in = "+str(wrf)+"\n")
+    print("mdoyin= "+str(mdotin)+' \n')
+    huh=input()
     return rar*rin, tauar
 
 # plots only xi and qeq
 def rmmplot(fname):
 
     mu2,md2,xi,qeq=rk.rmmread(fname)
-    print mu2
+    print(mu2)
 #    nkj=raw_input()
     wuu=unique(mu2)
     wdd=unique(md2)
     nuu=size(wuu)
     ndd=size(wdd)
     
-    print nuu
-    print ndd
+    print(nuu)
+    print(ndd)
 
     muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
@@ -537,7 +543,7 @@ def difeta():
     plt.clf()
     fig=plt.figure()
     ax = fig.add_subplot(111)
-    cax1=ax.contourf(muar_f1, mdar_f1, deltaxi/xiar_f1, levels=levs ,cmap='jet') #,levels=rlev)
+    cax1=ax.contourf(muar_f1, mdar_f1, old_div(deltaxi,xiar_f1), levels=levs ,cmap='jet') #,levels=rlev)
     p0 = ax.get_position().get_points().flatten()
     ax_cbar = fig.add_axes([p0[0], p0[3]+0.1, p0[2]-0.125, 0.025])
     cbar = plt.colorbar(cax1,cax=ax_cbar,orientation='horizontal',ticks=[0.1,0.2,0.3,0.4,0.5,0.6,0.7])
@@ -546,7 +552,7 @@ def difeta():
     ax.tick_params(labelsize=18, length=8, width=1.0, which='major', pad=8)
     ax.tick_params(labelsize=18, length=4, width=1.0, which='minor', pad=8)
     ax2 = ax.twinx()
-    ax2.contourf(muar_f1, mdar_f1*2.*1.e38*0.1, deltaxi/xiar_f1, levels=levs,cmap='jet') #,levels=rlev)
+    ax2.contourf(muar_f1, mdar_f1*2.*1.e38*0.1, old_div(deltaxi,xiar_f1), levels=levs,cmap='jet') #,levels=rlev)
     title(r'$\Delta \xi/\xi$',fontsize=20)
     ax.set_xlabel('$\mu$, $10^{30}$G\,cm$^{3}$',fontsize=20)
     ax.set_ylabel('$\dot{m}$',fontsize=20)
@@ -607,8 +613,8 @@ def everything(rmmfile):
     nuu=size(wuu)
     ndd=size(wdd)
     
-    print nuu
-    print ndd
+    print(nuu)
+    print(ndd)
 
     muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
@@ -627,8 +633,8 @@ def everything(rmmfile):
             mdot_e=mdar[ku,kd]
             xi_e=xiar[ku,kd]
             qeq_e=qeqar[ku,kd]
-            print mdotglobal
-            print mu
+            print(mdotglobal)
+            print(mu)
             oint, hint, tint, htormax, mdotin, wint = d.rastr(xiar[ku,kd], qeqar[ku,kd])
             fout.write(str(mu_e)+' '+str(mdot_e)+' '+str(xi_e)+' '+str(qeq_e)+' '+str(oint)+' '+str(hint)+' '+str(htormax)+' '+str(mdotin)+' '+str(wint)+ '\n')
             fout.flush()
@@ -645,8 +651,8 @@ def old_prep(rmmfile):
     nuu=size(wuu)
     ndd=size(wdd)
     
-    print nuu
-    print ndd
+    print(nuu)
+    print(ndd)
 
     muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
@@ -676,18 +682,18 @@ def rmmplot_all(fname):
     wdd=unique(md2)
     nuu=size(wuu)
     ndd=size(wdd)
-    print qeq.min()
-    print qeq.max()
-    print htormax.min()
-    print htormax.max()
-    print mdotin.min()
-    print mdotin.max()
-    print madvterm.min()
-    print madvterm.max()
+    print(qeq.min())
+    print(qeq.max())
+    print(htormax.min())
+    print(htormax.max())
+    print(mdotin.min())
+    print(mdotin.max())
+    print(madvterm.min())
+    print(madvterm.max())
  #   lj=raw_input()
     
-    print nuu
-    print ndd
+    print(nuu)
+    print(ndd)
 
     muar1=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar1=reshape(asarray(md2,dtype=double),[nuu,ndd])
@@ -716,7 +722,7 @@ def rmmplot_all(fname):
     levsxi=np.asarray([1.25,1.26,1.27], dtype=double)
  #   norm = colors.BoundaryNorm(boundaries=levs, ncolors=256)
 
-    ksiold=2.**(-3./7.)*(1./3.*hintar)**(2./7.)
+    ksiold=2.**(old_div(-3.,7.))*(1./3.*hintar)**(old_div(2.,7.))
  
     plt.clf()
     fig=plt.figure()
@@ -746,8 +752,8 @@ def rmmplot_all(fname):
     plt.savefig(fname+'_xi.eps')
     plt.close()
 
-    xiarnew=xiar*mdotinar**(2./7.)
-    difxi=xiar*(1.-mdotinar**(2./7.))
+    xiarnew=xiar*mdotinar**(old_div(2.,7.))
+    difxi=xiar*(1.-mdotinar**(old_div(2.,7.)))
     
     plt.clf()
     fig=plt.figure()
@@ -955,9 +961,9 @@ def rmmplot_all(fname):
     plt.close()
 
     plt.clf()
-    plot(hintar,xiar*mdotinar**(2./7.),color='black')
+    plot(hintar,xiar*mdotinar**(old_div(2.,7.)),color='black')
     plot(hintar,xiar,color='blue')
-    plot(hintar,1.113*hintar**(2./7.),color='red')
+    plot(hintar,1.113*hintar**(old_div(2.,7.)),color='red')
  #   plt.xscale('log')
     xlim(0.5,1.4)
     ylim(0.9,1.3)
@@ -977,8 +983,8 @@ def rmmplot_crazy(fname):
     ndd=size(wdd)
     
 
-    print nuu
-    print ndd
+    print(nuu)
+    print(ndd)
 
     muar=reshape(asarray(mu2,dtype=double),[nuu,ndd])
     mdar=reshape(asarray(md2,dtype=double),[nuu,ndd])
@@ -992,13 +998,13 @@ def rmmplot_crazy(fname):
 #    mdarnew=reshape(asarray(mdar2,dtype=double),[nuu1,ndd1])
 
 
-    dotp=6.31e-3*1.137**2.*mdar**(6./7.)*muar**(1./7.)
+    dotp=6.31e-3*1.137**2.*mdar**(old_div(6.,7.))*muar**(old_div(1.,7.))
  #   dotpnew=1.38e-5*1.137**2.*mdarnew**(6./7.)*muarnew**(1./7.)
     
-    pconst=pstar*lam**(3./7.)*muar**(6./7.)*xiar**(-0.25)*(1./3.)**(0.5)*mdar**(-3./7.)*2.**(3./7.)
+    pconst=pstar*lam**(old_div(3.,7.))*muar**(old_div(6.,7.))*xiar**(-0.25)*(old_div(1.,3.))**(0.5)*mdar**(old_div(-3.,7.))*2.**(old_div(3.,7.))
     
     
-    psc=muar-0.9607*mdar**(1./2.)
+    psc=muar-0.9607*mdar**(old_div(1.,2.))
     levs=np.arange(0.1,1.4,0.01)
     levs1=np.asarray([0.8,0.85,0.9,0.95,0.99], dtype=double)*100.
     levsxi=np.asarray([1.25,1.26,1.27], dtype=double)
@@ -1075,13 +1081,21 @@ def rmmplot_crazy(fname):
     plt.savefig(fname+'_xi.eps')
     plt.close()
 
-
-
-
+def rinshow(infile):
     
+    mu,md,xi,qeq=rk.rmmread(infile)
+    
+    ra=raffugen(mu,md)
+    
+    rin=xi*ra
 
-    
-    
+    clf()
+    plot(md, rin, color='k')
+    xscale('log')
+    yscale('log')
+    xlabel(r'$\dot m$')
+    ylabel(r'$r_{\rm in}$')
+    savefig('rinshow.eps')
     
     
 
